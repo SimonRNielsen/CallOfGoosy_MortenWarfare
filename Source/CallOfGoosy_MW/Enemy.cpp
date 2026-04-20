@@ -32,3 +32,8 @@ void AEnemy::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 
 }
 
+void AEnemy::GetHit_Implementation()
+{
+	UE_LOG(LogTemp, Warning, TEXT("Enemy got hit!")); //Hey Rikke, husk at fjerne denne linje senere, den er kun til test formål
+}
+

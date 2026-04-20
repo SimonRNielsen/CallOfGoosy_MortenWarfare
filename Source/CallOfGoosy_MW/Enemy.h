@@ -4,10 +4,11 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "IShootable.h"
 #include "Enemy.generated.h"
 
 UCLASS()
-class CALLOFGOOSY_MW_API AEnemy : public ACharacter
+class CALLOFGOOSY_MW_API AEnemy : public ACharacter, public IIShootable
 {
 	GENERATED_BODY()
 
@@ -25,5 +26,7 @@ public:
 
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+
+	virtual void GetHit_Implementation() override;
 
 };
