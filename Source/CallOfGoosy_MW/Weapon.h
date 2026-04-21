@@ -31,14 +31,14 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Weapon|Gun")
 	UDecalComponent* aimDot;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Player")
+	APlayerCharacter* player;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 	double maxDistance = 10000.0;
 	int damage = 5;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Player")
-	APlayerCharacter* player;
 
 public:	
 	// Called every frame
