@@ -32,3 +32,27 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 
 }
 
+void APlayerCharacter::DoGetWeapon()
+{
+
+}
+
+void APlayerCharacter::DoShoot()
+{
+
+}
+
+void APlayerCharacter::DoAim(double alpha)
+{
+
+}
+
+void APlayerCharacter::DoReload()
+{
+
+}
+
+void APlayerCharacter::TakeDamage(int damage)
+{
+
+}
