@@ -6,7 +6,7 @@
 // Sets default values
 APlayerCharacter::APlayerCharacter()
 {
- 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
+	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
 }
@@ -25,15 +25,17 @@ void APlayerCharacter::BeginPlay()
 
 	for (USkeletalMeshComponent* mesh : meshes)
 	{
-		if (mesh->GetName() == "CharacterMesh0") 
+		if (mesh->GetName() == "CharacterMesh0")
 		{
+
 			playerMesh = mesh; //Assigns the skeletal mesh with the name "CharacterMesh0" -> primary animated skeletal mesh for player
 			break;
+
 		}
 	}
 
 	DoGetWeapon(); //Calls the function to spawn and attach the weapon to the player
-	
+
 }
 
 // Called every frame
@@ -66,8 +68,13 @@ void APlayerCharacter::DoGetWeapon()
 		weaponC = GetWorld()->SpawnActor<AWeapon>(weaponClass, playerTransform, parameters);
 		weaponC->Player = this;
 
-		hasWeaponC = weaponC->AttachToComponent(playerMesh, FAttachmentTransformRules::SnapToTargetIncludingScale, TEXT("gunSocket"));
-		weaponC->GunMesh->SetRelativeScale3D(FVector(0.8f, 0.8f, 0.8f));
+		if (IsValid(weaponC))
+		{
+
+			hasWeaponC = weaponC->AttachToComponent(playerMesh, FAttachmentTransformRules::SnapToTargetIncludingScale, TEXT("gunSocket"));
+			weaponC->GunMesh->SetRelativeScale3D(FVector(0.8f, 0.8f, 0.8f));
+
+		}
 
 	}
 
@@ -97,6 +104,13 @@ void APlayerCharacter::DoShoot()
 void APlayerCharacter::DoAim(float alpha)
 {
 
+	if (!IsValid(springArm))
+	{
+
+		return;
+
+	}
+
 	springArm->TargetArmLength = FMath::Lerp(cameraboom_Zoomed_Out, cameraboom_Zoomed_In, alpha); //Lerps between the two values for a zoom in/out effect
 
 	/*
@@ -105,6 +119,7 @@ void APlayerCharacter::DoAim(float alpha)
 
 	springArm->SocketOffset = FVector(0.0f, newSocketY, newSocketZ); //Sets the socket offset to the new values
 	*/
+
 	springArm->SocketOffset = FVector(0.0f, FMath::Lerp(socketY_Zoomed_Out, socketY_Zoomed_In, alpha), FMath::Lerp(socketZ_Zoomed_Out, socketZ_Zoomed_In, alpha)); //One-liner of the above calculations
 
 	bUseControllerRotationYaw = isAimingC; //Determines whether the character should rotate with the controller when aiming
@@ -126,8 +141,15 @@ void APlayerCharacter::DoReload()
 void APlayerCharacter::BurnDamage(float timeOnFire, bool burning)
 {
 
+	if (!IsValid(burnEffect))
+	{
+
+		return;
+
+	}
+
 	//Burn effect logic toggle
-	if (isBurning && !burning) 
+	if (isBurning && !burning)
 	{
 
 		burnEffect->Deactivate(); //Burn effect ending
@@ -147,7 +169,7 @@ void APlayerCharacter::BurnDamage(float timeOnFire, bool burning)
 	{
 
 		burnTime -= 1.0f;
-		health -= 5; 
+		health -= 5;
 
 	}
 

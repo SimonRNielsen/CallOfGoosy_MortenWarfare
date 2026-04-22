@@ -27,30 +27,32 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Weapon|Mesh")
 	USkeletalMeshComponent* GunMesh;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Weapon|Gun")
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Weapon|Gun")
 	UDecalComponent* AimDot;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Weapon|Gun")
 	int ammo = 30;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Weapon|Gun")
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Weapon|Gun")
 	int maxAmmo = 30;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Weapon|Gun")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon|Gun")
 	int HeadShotMultiplier = 3;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Weapon|Gun")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon|Gun")
 	int BodyShotMultiplier = 2;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Weapon|Gun")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon|Gun")
 	int ShotMultiplier = 1;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon|Gun")
+	int damage = 5;
 
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
 	float maxDistance = 10000.0;
-	int damage = 5;
 
 	bool DoLineTrace(FHitResult& result);
 

@@ -30,26 +30,36 @@ void AWeapon::Tick(float DeltaTime)
 
 	if (!IsValid(Player)) //Check if player is valid (not null/nullptr and not about to be destroyed)
 	{
+
 		return;
+
 	}
 
 	if (Player->isShootingC) //If the player is shooting, do a early return since shooting logic is handled in the "Shoot" function, and the rest of the code isn't beneficial for player or performance if the player is shooting
 	{
+
 		return;
+
 	}
 
 	if (IsValid(AimDot)) //Checks if "AimDot" is valid in same manner as "player"  
 	{
+
 		AimDot->SetVisibility(Player->isAimingC); //Sets the visibility of the dot to be the same as the players aiming state, so it's only visible when the player is actively aiming
+
 	}
 	else 
 	{
+
 		return;
+
 	}
 
 	if (!Player->isAimingC) //Early return if the player isn't aiming, since the dot most likely wouldn't be helpful, and only take up performance needlessly then
 	{
+
 		return;
+
 	}
 	
 	AimDotMovement(); //Calls AimDotMovement that moves the aiming dot to a updated position every frame
@@ -61,8 +71,13 @@ void AWeapon::Shoot()
 
 	FHitResult hitResult; //Hit result struct that is a "out" parameter of the line trace, provides information about hit results
 
-	DoLineTrace(hitResult); //Calls the helper function "DoLineTrace" that does a line trace and returns whether it hit anything, and "fills" the hitResult with information about the first blocking hit object - if any
-	
+	if (!DoLineTrace(hitResult)) //Calls the helper function "DoLineTrace" that does a line trace and returns whether it hit anything, and "fills" the hitResult with information about the first blocking hit object - if any
+	{
+
+		return;
+
+	}
+
 	if (hitResult.bBlockingHit) //Proceeds if a blocking hit was detected
 	{
 
@@ -109,7 +124,12 @@ void AWeapon::AimDotMovement()
 	
 	FHitResult hitResult; //Hit result struct that is a "out" parameter of the line trace, provides information about hit results
 
-	DoLineTrace(hitResult); //Calls the helper function "DoLineTrace" that does a line trace and returns whether it hit anything, and "fills" the hitResult with information about the first blocking hit object - if any
+	if (!DoLineTrace(hitResult)) //Calls the helper function "DoLineTrace" that does a line trace and returns whether it hit anything, and "fills" the hitResult with information about the first blocking hit object - if any
+	{
+
+		return;
+
+	}
 
 	if (hitResult.bBlockingHit) //Proceeds if a blocking hit was detected
 	{
@@ -133,7 +153,9 @@ bool AWeapon::DoLineTrace(FHitResult& result)
 
 	if (!IsValid(GunMesh))
 	{
+
 		return false;
+
 	}
 
 	//Line trace point calculations
