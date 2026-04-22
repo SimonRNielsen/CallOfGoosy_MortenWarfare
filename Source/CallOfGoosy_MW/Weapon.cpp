@@ -69,6 +69,10 @@ void AWeapon::Tick(float DeltaTime)
 void AWeapon::Shoot()
 {
 
+	ammo--; //Reduces ammo-count by 1 when shooting
+
+	Player->UpdateAmmo.Broadcast(); //Broadcasts custom event dispatcher (signals HUD to update ammo-count)
+
 	FHitResult hitResult; //Hit result struct that is a "out" parameter of the line trace, provides information about hit results
 
 	if (!DoLineTrace(hitResult)) //Calls the helper function "DoLineTrace" that does a line trace and returns whether it hit anything, and "fills" the hitResult with information about the first blocking hit object - if any
@@ -89,18 +93,24 @@ void AWeapon::Shoot()
 			int multiplier;
 			if (hitResult.BoneName == FName("upper_neck"))
 			{
+
 				UE_LOG(LogTemp, Warning, TEXT("Enemy got hit in upper neck/head!"));
 				multiplier = HeadShotMultiplier;
+
 			}
 			else if (hitResult.BoneName == FName("lower_neck") || hitResult.BoneName == FName("root"))
 			{
+
 				UE_LOG(LogTemp, Warning, TEXT("Enemy got hit in lower neck/body!"));
 				multiplier = BodyShotMultiplier;
+
 			}
 			else
 			{
+
 				UE_LOG(LogTemp, Warning, TEXT("Enemy got hit in %s"), *hitResult.BoneName.ToString());
 				multiplier = ShotMultiplier;
+
 			}
 
 			IIShootable::Execute_GetHit(hitActor, damage * multiplier); //Calls the "GetHit" function from the "IShootable" interface on the hit actor, and passes in the damage multiplied by the appropriate multiplier based on where the enemy was hit (head, body, or other)
@@ -112,6 +122,22 @@ void AWeapon::Shoot()
 		{
 
 			//Hit surface logic -> spawn niagara effect at the hit location, with a rotation based on the normal of the hit surface, so it looks like it's hitting the surface instead of being sideways
+			if (hitResult.bBlockingHit && HitSpark)
+			{
+
+				UNiagaraFunctionLibrary::SpawnSystemAtLocation(
+					GetWorld(),
+					HitSpark,
+					hitResult.ImpactPoint,
+					hitResult.ImpactNormal.Rotation(),
+					FVector(1.0f),
+					true,
+					true,
+					ENCPoolMethod::AutoRelease,
+					true
+				);
+
+			}
 		
 		}
 

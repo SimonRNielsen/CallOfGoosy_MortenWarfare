@@ -8,6 +8,8 @@
 #include "Kismet/KismetMathLibrary.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "IShootable.h"
+#include "NiagaraComponent.h"
+#include "NiagaraFunctionLibrary.h"
 #include "Weapon.generated.h"
 
 class APlayerCharacter;
@@ -21,10 +23,10 @@ public:
 	// Sets default values for this actor's properties
 	AWeapon();
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Player")
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player")
 	APlayerCharacter* Player;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Weapon|Mesh")
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Weapon|Mesh")
 	USkeletalMeshComponent* GunMesh;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Weapon|Gun")
@@ -47,6 +49,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon|Gun")
 	int damage = 5;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon|Gun")
+	UNiagaraSystem* HitSpark;
 
 protected:
 	// Called when the game starts or when spawned

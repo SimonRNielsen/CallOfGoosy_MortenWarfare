@@ -29,10 +29,13 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player|Health")
 	int health = 100;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Player|Health")
+	UPROPERTY(EditAnyWhere, BlueprintReadWrite, Category = "Player|Health")
 	int maxHealth = 100;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Player|Health")
+	UPROPERTY(EditAnyWhere, BlueprintReadWrite, Category = "Player|Health")
+	int fireDamage = 5;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player|Health")
 	UNiagaraComponent* burnEffect;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Player|Weapon")
@@ -47,43 +50,40 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Player|Weapon")
 	bool hasWeaponC = false;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player|Weapon")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player|Weapon")
 	TSubclassOf<AWeapon> weaponClass;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Player|Weapon")
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player|Weapon")
 	AWeapon* weaponC;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Player|Weapon")
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player|Weapon")
 	USkeletalMeshComponent* playerMesh;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player|Camera")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player|Camera")
 	float socketZ_Zoomed_Out = 0.0;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player|Camera")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player|Camera")
 	float socketZ_Zoomed_In = -15.0;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player|Camera")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player|Camera")
 	float socketY_Zoomed_Out = 0.0;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player|Camera")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player|Camera")
 	float socketY_Zoomed_In = 50.0;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player|Camera")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player|Camera")
 	float cameraboom_Zoomed_Out = 400.0;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player|Camera")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player|Camera")
 	float cameraboom_Zoomed_In = 300.0;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Player|Camera")
-	UCameraComponent* camera;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Player|Camera")
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player|Camera")
 	USpringArmComponent* springArm;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player|Camera")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player|Camera")
 	TSubclassOf<UUserWidget> HUDClass;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Player|Camera")
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player|Camera")
 	UUserWidget* HUD;
 
 	UPROPERTY(BlueprintAssignable, BlueprintCallable, Category = "Events")

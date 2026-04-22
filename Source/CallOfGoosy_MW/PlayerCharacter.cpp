@@ -18,7 +18,6 @@ void APlayerCharacter::BeginPlay()
 	Super::BeginPlay();
 
 	springArm = FindComponentByClass<USpringArmComponent>(); //Finds the spring arm component in the characters components and assigns it to the springArm variable
-	camera = FindComponentByClass<UCameraComponent>(); //Finds the camera component in the characters components and assigns it to the camera variable
 	burnEffect = FindComponentByClass<UNiagaraComponent>(); //Finds the niagara component in the characters components and assigns it to the burnEffect variable
 	TArray<USkeletalMeshComponent*> meshes; //Array to find all skeletal mesh components on the player (player has multiple -> metahuman)
 	GetComponents<USkeletalMeshComponent>(meshes); //Fills array with all skeletal meshes found
@@ -105,10 +104,6 @@ void APlayerCharacter::DoShoot()
 
 			isShootingC = true; //Sets shooting state to true, which is used for animations and blocking firing until animation is finished (reset by animation notify)
 
-			weaponC->ammo--; //Reduces ammo-count by 1 when shooting
-
-			UpdateAmmo.Broadcast(); //Broadcasts custom event dispatcher (signals HUD to update ammo-count)
-
 			weaponC->Shoot(); //Calls the weapons Shoot function that handles raycasting and applying hit logic (damage, niagara effects)
 
 		}
@@ -185,7 +180,7 @@ void APlayerCharacter::BurnDamage(float timeOnFire, bool burning)
 	{
 
 		burnTime -= 1.0f;
-		health -= 5;
+		health -= fireDamage;
 		UpdateHealth.Broadcast(); //Broadcasts custom event dispatcher (signals HUD to update healthbar)
 
 	}
