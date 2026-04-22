@@ -15,7 +15,11 @@ AWeapon::AWeapon()
 // Called when the game starts or when spawned
 void AWeapon::BeginPlay()
 {
+
 	Super::BeginPlay();
+
+	AimDot = FindComponentByClass<UDecalComponent>();
+	GunMesh = FindComponentByClass<USkeletalMeshComponent>();
 	
 }
 
@@ -47,7 +51,7 @@ void AWeapon::Tick(float DeltaTime)
 	{
 		return;
 	}
-
+	
 	AimDotMovement(); //Calls AimDotMovement that moves the aiming dot to a updated position every frame
 
 }
@@ -102,7 +106,7 @@ void AWeapon::Shoot()
 
 void AWeapon::AimDotMovement()
 {
-
+	
 	FHitResult hitResult; //Hit result struct that is a "out" parameter of the line trace, provides information about hit results
 
 	DoLineTrace(hitResult); //Calls the helper function "DoLineTrace" that does a line trace and returns whether it hit anything, and "fills" the hitResult with information about the first blocking hit object - if any
@@ -117,8 +121,8 @@ void AWeapon::AimDotMovement()
 
 		AimDot->SetWorldLocationAndRotation(impactPoint, finalRotation); //Sets location and rotation from the above calculations
 
-		float newScale = UKismetMathLibrary::FClamp(hitResult.Distance, 1.0f, 10.0f) * 0.006f; //Clamps the distance from the player to the hit point between 1 and 10 and multiplies it to set the scale of the aimdot, so it gets bigger the further away it is, to make it more visible at range
-		AimDot->SetWorldScale3D(FVector(newScale)); //Sets the scale of the aimdot to the above calculation
+		float newScale = UKismetMathLibrary::FClamp(hitResult.Distance * 0.006f, 1.0f, 10.0f); //Clamps the distance from the player to the hit point between 1 and 10 and multiplies it to set the scale of the aimdot, so it gets bigger the further away it is, to make it more visible at range
+		AimDot->SetWorldScale3D(FVector(newScale, newScale, newScale)); //Sets the scale of the aimdot to the above calculation
 
 	}
 

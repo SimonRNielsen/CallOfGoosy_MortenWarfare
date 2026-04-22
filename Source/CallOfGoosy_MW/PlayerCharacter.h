@@ -5,6 +5,9 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "Weapon.h"
+#include "NiagaraComponent.h"
+#include "Camera/CameraComponent.h"
+#include "GameFramework/SpringArmComponent.h"
 #include "PlayerCharacter.generated.h"
 
 UCLASS()
@@ -16,28 +19,32 @@ public:
 	// Sets default values for this character's properties
 	APlayerCharacter();
 
-
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Player|Health")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player|Health")
 	int health = 100;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Player|Health")
-	float burnTime = 0.0;
+	UNiagaraComponent* burnEffect;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player|Weapon")
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Player|Weapon")
 	bool isAimingC = false;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player|Weapon")
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Player|Weapon")
 	bool isShootingC = false;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player|Weapon")
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Player|Weapon")
 	bool isReloadingC = false;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player|Weapon")
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Player|Weapon")
 	bool hasWeaponC = false;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player|Weapon")
+	TSubclassOf<AWeapon> weaponClass;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Player|Weapon")
 	AWeapon* weaponC;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Player|Weapon")
+	USkeletalMeshComponent* playerMesh;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player|Camera")
 	float socketZ_Zoomed_Out = 0.0;
@@ -57,9 +64,20 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player|Camera")
 	float cameraboom_Zoomed_In = 300.0;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Player|Camera")
+	UCameraComponent* camera;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Player|Camera")
+	USpringArmComponent* springArm;
+
 protected:
+
+	float burnTime = 0.0;
+	bool isBurning = false;
+
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+
 
 public:	
 	// Called every frame
@@ -81,6 +99,6 @@ public:
 	void DoReload();
 
 	UFUNCTION(BlueprintCallable, Category = "Health")
-	void BurnDamage(float timeOnFire);
+	void BurnDamage(float timeOnFire, bool burning);
 
 };
