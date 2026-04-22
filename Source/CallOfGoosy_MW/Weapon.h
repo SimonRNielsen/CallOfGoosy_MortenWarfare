@@ -6,6 +6,8 @@
 #include "GameFramework/Actor.h"
 #include "Components/DecalComponent.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "Kismet/KismetSystemLibrary.h"
+#include "IShootable.h"
 #include "Weapon.generated.h"
 
 class APlayerCharacter;
@@ -19,6 +21,15 @@ public:
 	// Sets default values for this actor's properties
 	AWeapon();
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Player")
+	APlayerCharacter* Player;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Weapon|Mesh")
+	USkeletalMeshComponent* GunMesh;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Weapon|Gun")
+	UDecalComponent* AimDot;
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Weapon|Gun")
 	int ammo = 30;
 
@@ -26,19 +37,22 @@ public:
 	int maxAmmo = 30;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Weapon|Gun")
-	bool canFire = true;
+	int HeadShotMultiplier = 3;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Weapon|Gun")
-	UDecalComponent* aimDot;
+	int BodyShotMultiplier = 2;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Player")
-	APlayerCharacter* player;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Weapon|Gun")
+	int ShotMultiplier = 1;
 
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
-	double maxDistance = 10000.0;
+
+	float maxDistance = 10000.0;
 	int damage = 5;
+
+	bool DoLineTrace(FHitResult& result);
 
 public:	
 	// Called every frame

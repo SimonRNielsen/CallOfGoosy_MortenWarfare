@@ -42,7 +42,7 @@ void APlayerCharacter::DoShoot()
 
 }
 
-void APlayerCharacter::DoAim(double alpha)
+void APlayerCharacter::DoAim(float alpha)
 {
 
 }
@@ -52,7 +52,7 @@ void APlayerCharacter::DoReload()
 
 }
 
-void APlayerCharacter::TakeDamage(int damage)
+void APlayerCharacter::BurnDamage(float timeOnFire)
 {
 
 }

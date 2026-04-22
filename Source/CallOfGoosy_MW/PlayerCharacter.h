@@ -21,6 +21,9 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Player|Health")
 	int health = 100;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Player|Health")
+	float burnTime = 0.0;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player|Weapon")
 	bool isAimingC = false;
 
@@ -37,22 +40,22 @@ public:
 	AWeapon* weaponC;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player|Camera")
-	double socketZ_Zoomed_Out = 0.0;
+	float socketZ_Zoomed_Out = 0.0;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player|Camera")
-	double socketZ_Zoomed_In = -15.0;
+	float socketZ_Zoomed_In = -15.0;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player|Camera")
-	double socketY_Zoomed_Out = 0.0;
+	float socketY_Zoomed_Out = 0.0;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player|Camera")
-	double socketY_Zoomed_In = 50.0;
+	float socketY_Zoomed_In = 50.0;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player|Camera")
-	double cameraboom_Zoomed_Out = 400.0;
+	float cameraboom_Zoomed_Out = 400.0;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player|Camera")
-	double cameraboom_Zoomed_In = 300.0;
+	float cameraboom_Zoomed_In = 300.0;
 
 protected:
 	// Called when the game starts or when spawned
@@ -72,12 +75,12 @@ public:
 	void DoShoot();
 
 	UFUNCTION(BlueprintCallable, Category = "Weapon")
-	void DoAim(double alpha);
+	void DoAim(float alpha);
 
 	UFUNCTION(BlueprintCallable, Category = "Weapon")
 	void DoReload();
 
 	UFUNCTION(BlueprintCallable, Category = "Health")
-	void TakeDamage(int damage);
+	void BurnDamage(float timeOnFire);
 
 };
