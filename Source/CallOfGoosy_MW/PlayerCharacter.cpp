@@ -29,12 +29,26 @@ void APlayerCharacter::BeginPlay()
 		{
 
 			playerMesh = mesh; //Assigns the skeletal mesh with the name "CharacterMesh0" -> primary animated skeletal mesh for player
-			break;
+			break; //Early break if the mesh is found (should be first entry -> root)
 
 		}
 	}
 
 	DoGetWeapon(); //Calls the function to spawn and attach the weapon to the player
+
+	if (IsValid(HUDClass)) 
+	{
+
+		HUD = CreateWidget<UUserWidget>(GetWorld(), HUDClass);
+
+		if (IsValid(HUD))
+		{
+
+			HUD->AddToViewport();
+
+		}
+
+	}
 
 }
 
@@ -60,19 +74,19 @@ void APlayerCharacter::DoGetWeapon()
 	if (weaponClass && IsValid(playerMesh)) //Checks for required variables to spawn and attach weapon to player
 	{
 
-		FTransform playerTransform = playerMesh->GetSocketTransform(TEXT("gunSocket"), RTS_World);
-		FActorSpawnParameters parameters;
+		FTransform playerTransform = playerMesh->GetSocketTransform(TEXT("gunSocket"), RTS_World); //Gets the transform for the right hand "gunSocket" that will grab the handle of the gun
+		FActorSpawnParameters parameters; //Used for setting additional spawnparameters
 		parameters.Owner = this;
 		parameters.Instigator = GetInstigator();
 
-		weaponC = GetWorld()->SpawnActor<AWeapon>(weaponClass, playerTransform, parameters);
-		weaponC->Player = this;
+		weaponC = GetWorld()->SpawnActor<AWeapon>(weaponClass, playerTransform, parameters); //Sets the pointer while spawning the weapon at the same time
 
-		if (IsValid(weaponC))
+		if (IsValid(weaponC)) //Failsafe in case the spawning fails
 		{
 
-			hasWeaponC = weaponC->AttachToComponent(playerMesh, FAttachmentTransformRules::SnapToTargetIncludingScale, TEXT("gunSocket"));
-			weaponC->GunMesh->SetRelativeScale3D(FVector(0.8f, 0.8f, 0.8f));
+			weaponC->Player = this; //Sets the Player reference of the weapon to the creator
+			hasWeaponC = weaponC->AttachToComponent(playerMesh, FAttachmentTransformRules::SnapToTargetIncludingScale, TEXT("gunSocket")); //Attaches the weapon to the "gunSocket" on the hand, "welding" them together
+			weaponC->GunMesh->SetRelativeScale3D(FVector(0.8f, 0.8f, 0.8f)); //Scales the weapon down to a more fitting size compared to player
 
 		}
 
@@ -92,6 +106,8 @@ void APlayerCharacter::DoShoot()
 			isShootingC = true; //Sets shooting state to true, which is used for animations and blocking firing until animation is finished (reset by animation notify)
 
 			weaponC->ammo--; //Reduces ammo-count by 1 when shooting
+
+			UpdateAmmo.Broadcast(); //Broadcasts custom event dispatcher (signals HUD to update ammo-count)
 
 			weaponC->Shoot(); //Calls the weapons Shoot function that handles raycasting and applying hit logic (damage, niagara effects)
 
@@ -170,6 +186,7 @@ void APlayerCharacter::BurnDamage(float timeOnFire, bool burning)
 
 		burnTime -= 1.0f;
 		health -= 5;
+		UpdateHealth.Broadcast(); //Broadcasts custom event dispatcher (signals HUD to update healthbar)
 
 	}
 

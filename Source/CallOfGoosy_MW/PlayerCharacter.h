@@ -7,8 +7,15 @@
 #include "Weapon.h"
 #include "NiagaraComponent.h"
 #include "Camera/CameraComponent.h"
+#include "Blueprint/UserWidget.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "PlayerCharacter.generated.h"
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FUpdateHealth);
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FUpdateAmmo);
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FUpdateKills);
 
 UCLASS()
 class CALLOFGOOSY_MW_API APlayerCharacter : public ACharacter
@@ -21,6 +28,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player|Health")
 	int health = 100;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Player|Health")
+	int maxHealth = 100;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Player|Health")
 	UNiagaraComponent* burnEffect;
@@ -69,6 +79,22 @@ public:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Player|Camera")
 	USpringArmComponent* springArm;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player|Camera")
+	TSubclassOf<UUserWidget> HUDClass;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Player|Camera")
+	UUserWidget* HUD;
+
+	UPROPERTY(BlueprintAssignable, BlueprintCallable, Category = "Events")
+	FUpdateHealth UpdateHealth;
+
+	UPROPERTY(BlueprintAssignable, BlueprintCallable, Category = "Events")
+	FUpdateHealth UpdateAmmo;
+
+	UPROPERTY(BlueprintAssignable, BlueprintCallable, Category = "Events")
+	FUpdateKills UpdateKills;
+
 
 protected:
 
