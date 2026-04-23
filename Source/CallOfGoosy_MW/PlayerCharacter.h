@@ -17,6 +17,8 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE(FUpdateAmmo);
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FUpdateKills);
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FPlayerDeath);
+
 UCLASS()
 class CALLOFGOOSY_MW_API APlayerCharacter : public ACharacter
 {
@@ -35,8 +37,14 @@ public:
 	UPROPERTY(EditAnyWhere, BlueprintReadWrite, Category = "Player|Health")
 	int fireDamage = 5;
 
+	UPROPERTY(EditAnyWhere, BlueprintReadWrite, Category = "Player|Health")
+	float tickInterval = 1.0f;
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player|Health")
 	UNiagaraComponent* burnEffect;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Player|Health")
+	bool IsAlive = true;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Player|Weapon")
 	bool isAimingC = false;
@@ -95,6 +103,8 @@ public:
 	UPROPERTY(BlueprintAssignable, BlueprintCallable, Category = "Events")
 	FUpdateKills UpdateKills;
 
+	UPROPERTY(BlueprintAssignable, Category = "Events")
+	FPlayerDeath PlayerDeath;
 
 protected:
 
@@ -104,6 +114,9 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
+private:
+
+	FCriticalSection BurnLock; //Thread lock
 
 public:	
 	// Called every frame
@@ -126,5 +139,8 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Health")
 	void BurnDamage(float timeOnFire, bool burning);
+
+	UFUNCTION(BlueprintCallable, Category = "Health")
+	void ResetPlayer();
 
 };

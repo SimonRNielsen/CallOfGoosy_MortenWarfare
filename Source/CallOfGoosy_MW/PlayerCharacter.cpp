@@ -35,7 +35,7 @@ void APlayerCharacter::BeginPlay()
 
 	DoGetWeapon(); //Calls the function to spawn and attach the weapon to the player
 
-	if (IsValid(HUDClass)) 
+	if (IsValid(HUDClass))
 	{
 
 		HUD = CreateWidget<UUserWidget>(GetWorld(), HUDClass);
@@ -96,7 +96,7 @@ void APlayerCharacter::DoGetWeapon()
 void APlayerCharacter::DoShoot()
 {
 
-	if (hasWeaponC && isAimingC && IsValid(weaponC)) //Checks if the player has a weapon, is aiming, and that the weapon is set and exists
+	if (hasWeaponC && isAimingC && IsValid(weaponC) && IsAlive) //Checks if the player has a weapon, is aiming, and that the weapon is set and exists
 	{
 
 		if (!isReloadingC && !isShootingC && weaponC->ammo > 0) //Checks if the player is currently reloading or shooting, and that the weapon has ammo, if no ammo or already doing another action with the weapon, it won't allow another shot to be fired
@@ -115,7 +115,7 @@ void APlayerCharacter::DoShoot()
 void APlayerCharacter::DoAim(float alpha)
 {
 
-	if (!IsValid(springArm))
+	if (!IsValid(springArm) || !hasWeaponC || !IsAlive)
 	{
 
 		return;
@@ -124,7 +124,7 @@ void APlayerCharacter::DoAim(float alpha)
 
 	springArm->TargetArmLength = FMath::Lerp(cameraboom_Zoomed_Out, cameraboom_Zoomed_In, alpha); //Lerps between the two values for a zoom in/out effect
 
-	/*
+	/* Deprecated to one-liner below
 	double newSocketY = FMath::Lerp(socketY_Zoomed_Out, socketY_Zoomed_In, alpha); //Lerps between the two values for a over-the-shoulder effect
 	double newSocketZ = FMath::Lerp(socketZ_Zoomed_Out, socketZ_Zoomed_In, alpha); //Same as above but for Z axis
 
@@ -140,7 +140,7 @@ void APlayerCharacter::DoAim(float alpha)
 void APlayerCharacter::DoReload()
 {
 
-	if (IsValid(weaponC) && hasWeaponC && !isReloadingC && !isShootingC) //Checks if the player has a valid weapon and not already shooting or reloading
+	if (IsValid(weaponC) && hasWeaponC && !isReloadingC && !isShootingC && IsAlive) //Checks if the player has a valid weapon and not already shooting or reloading
 	{
 
 		isReloadingC = true; //Sets reloading state to true, which triggers the reload animation and blocks other usage of the weapon until the reload is finished (reset by animation notify)
@@ -152,43 +152,109 @@ void APlayerCharacter::DoReload()
 void APlayerCharacter::BurnDamage(float timeOnFire, bool burning)
 {
 
-	if (!IsValid(burnEffect))
+	FScopeLock Lock(&BurnLock);
+
+	if (!IsAlive)
 	{
 
-		return;
+		UE_LOG(LogTemp, Warning, TEXT("Attempted burn damage on a player set as dead!"));
+		return; //That which is dead, may never die
 
 	}
 
 	//Burn effect logic toggle
-	if (isBurning && !burning)
+	if (IsValid(burnEffect))
 	{
 
-		burnEffect->Deactivate(); //Burn effect ending
+		if (isBurning && !burning)
+		{
+
+			burnEffect->Deactivate(); //Burn effect ending
+
+		}
+		else if (!isBurning && burning)
+		{
+
+			burnEffect->Activate(); //Starts burn effect
+
+		}
+
+		isBurning = burning; //Sets the burning state to the value of the "burning" parameter, which is used to toggle the VFX for burning
 
 	}
-	else if (!isBurning && burning)
-	{
 
-		burnEffect->Activate(); //Starts burneffect
-
-	}
-
-	isBurning = burning; //Sets the burning state to the value of the "burning" parameter, which is used to toggle the VFX for burning
 	burnTime += timeOnFire; //Adds the time from blueprint timeline to the burnTime variable (used to determine when to take damage)
 
-	if (burnTime >= 1.0f) //Applies burn damage every second the player is on fire, and reduces
+	bool update = false;
+
+	while (burnTime >= tickInterval) //Applies burn damage comparable to the amount of ticks the player is on fire, and reduces health by "fireDamage" and timer 
 	{
 
-		burnTime -= 1.0f;
+		burnTime -= tickInterval;
 		health -= fireDamage;
+		update = true;
+
+	}
+
+	if (update)
+	{
+
 		UpdateHealth.Broadcast(); //Broadcasts custom event dispatcher (signals HUD to update healthbar)
 
 	}
 
-	if (health <= 0) //Checks if the players health has reached 0 or below, and triggers death logic if so
+	if (health <= 0 && IsAlive) //Checks if the players health has reached 0 or below, and triggers death logic if so
 	{
 
-		UE_LOG(LogTemp, Warning, TEXT("Player burned to death - death logic needs implementing"));
+		IsAlive = false;
+		PlayerDeath.Broadcast(); //Broadcasts custom event dispatcher (signals players death)
+		burnTime = 0.0f; //Removes excess accumulated time so if pawn gets reset it will not get any "undeserved" damage
+
+		if (IsValid(burnEffect))
+		{
+
+			burnEffect->Deactivate(); //Burn effect ending
+
+		}
+
+	}
+
+}
+
+void APlayerCharacter::ResetPlayer()
+{
+
+	playerMesh->SetVisibility(true, true);
+
+	IsAlive = true;
+	health = maxHealth;
+
+	UpdateHealth.Broadcast();
+
+	if (IsValid(burnEffect))
+	{
+
+		burnEffect->Deactivate();
+
+	}
+
+	isAimingC = false;
+	isShootingC = false;
+	isReloadingC = false;
+	isBurning = false;
+
+	if (IsValid(weaponC))
+	{
+
+		if (IsValid(weaponC->GunMesh))
+		{
+
+			hasWeaponC = true;
+			weaponC->GunMesh->SetVisibility(true);
+			weaponC->ammo = weaponC->maxAmmo;
+			UpdateAmmo.Broadcast();
+
+		}
 
 	}
 
