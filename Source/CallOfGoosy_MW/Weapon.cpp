@@ -98,7 +98,7 @@ void AWeapon::Shoot()
 				multiplier = HeadShotMultiplier;
 
 			}
-			else if (hitResult.BoneName == FName("lower_neck") || hitResult.BoneName == FName("root"))
+			else if (hitResult.BoneName == FName("lower_neck") || hitResult.BoneName == FName("butt"))
 			{
 
 				UE_LOG(LogTemp, Warning, TEXT("Enemy got hit in lower neck/body!"));
@@ -113,9 +113,7 @@ void AWeapon::Shoot()
 
 			}
 
-			IIShootable::Execute_GetHit(hitActor, damage * multiplier, hitResult.ImpactPoint, hitResult.ImpactNormal.Rotation()); //Calls the "GetHit" function from the "IShootable" interface on the hit actor, and passes in the damage multiplied by the appropriate multiplier based on where the enemy was hit (head, body, or other)
-
-			//Apply VFX logic here or in GetHit function of the hit actor (requires method to take a FVector & FRotator or FTransform or FHitResult as parameter to get the location and rotation for the VFX)
+			IIShootable::Execute_GetHit(hitActor, damage * multiplier, hitResult.ImpactPoint, hitResult.ImpactNormal.Rotation()); //Calls the "GetHit" function from the "IShootable" interface on the hit actor, and passes in the damage multiplied by the appropriate multiplier based on where the enemy was hit (head, body, or other). Also informs the target where the hit occured
 
 		}
 		else 

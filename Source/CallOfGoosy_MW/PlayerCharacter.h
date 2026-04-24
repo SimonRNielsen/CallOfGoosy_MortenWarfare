@@ -108,7 +108,7 @@ public:
 
 protected:
 
-	float burnTime = 0.0;
+	float burnTime = 0.0f;
 	bool isBurning = false;
 
 	// Called when the game starts or when spawned
