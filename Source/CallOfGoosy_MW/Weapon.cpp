@@ -113,7 +113,7 @@ void AWeapon::Shoot()
 
 			}
 
-			IIShootable::Execute_GetHit(hitActor, damage * multiplier); //Calls the "GetHit" function from the "IShootable" interface on the hit actor, and passes in the damage multiplied by the appropriate multiplier based on where the enemy was hit (head, body, or other)
+			IIShootable::Execute_GetHit(hitActor, damage * multiplier, hitResult.ImpactPoint, hitResult.ImpactNormal.Rotation()); //Calls the "GetHit" function from the "IShootable" interface on the hit actor, and passes in the damage multiplied by the appropriate multiplier based on where the enemy was hit (head, body, or other)
 
 			//Apply VFX logic here or in GetHit function of the hit actor (requires method to take a FVector & FRotator or FTransform or FHitResult as parameter to get the location and rotation for the VFX)
 

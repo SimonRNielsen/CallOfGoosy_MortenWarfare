@@ -6,7 +6,7 @@
 // Sets default values
 AEnemy::AEnemy()
 {
- 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
+	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
 }
@@ -15,7 +15,7 @@ AEnemy::AEnemy()
 void AEnemy::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
 }
 
 // Called every frame
@@ -32,8 +32,34 @@ void AEnemy::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 
 }
 
-void AEnemy::GetHit_Implementation(int damage)
+void AEnemy::GetHit_Implementation(int damage, FVector impactPoint, FRotator impactNormal)
 {
-	UE_LOG(LogTemp, Warning, TEXT("Enemy got hit!")); //Hey Rikke, husk at fjerne denne linje senere, den er kun til test formål
+	//Taking damage which will be reduced by damage
+	health -= damage;
+
+	//Spawn hit particals
+	if (IsValid(FeatherEffect))
+	{
+
+		UNiagaraFunctionLibrary::SpawnSystemAtLocation(
+			GetWorld(),
+			FeatherEffect,
+			impactPoint,
+			impactNormal,
+			FVector(1.0f),
+			true,
+			true,
+			ENCPoolMethod::AutoRelease,
+			true
+		);
+
+	}
+
+	//If health is 0 or less call the HandleDeath event in Blueprint
+	if (health <= 0)
+	{
+		HandleDeath();
+		alive = false;
+	}
 }
 
