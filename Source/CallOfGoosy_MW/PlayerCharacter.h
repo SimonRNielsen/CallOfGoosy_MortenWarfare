@@ -4,7 +4,20 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "Weapon.h"
+#include "NiagaraComponent.h"
+#include "Camera/CameraComponent.h"
+#include "Blueprint/UserWidget.h"
+#include "GameFramework/SpringArmComponent.h"
 #include "PlayerCharacter.generated.h"
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FUpdateHealth);
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FUpdateAmmo);
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FUpdateKills);
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FPlayerDeath);
 
 UCLASS()
 class CALLOFGOOSY_MW_API APlayerCharacter : public ACharacter
@@ -15,9 +28,95 @@ public:
 	// Sets default values for this character's properties
 	APlayerCharacter();
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player|Health")
+	int health = 100;
+
+	UPROPERTY(EditAnyWhere, BlueprintReadWrite, Category = "Player|Health")
+	int maxHealth = 100;
+
+	UPROPERTY(EditAnyWhere, BlueprintReadWrite, Category = "Player|Health")
+	int fireDamage = 5;
+
+	UPROPERTY(EditAnyWhere, BlueprintReadWrite, Category = "Player|Health")
+	float tickInterval = 1.0f;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player|Health")
+	UNiagaraComponent* burnEffect;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Player|Health")
+	bool IsAlive = true;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Player|Weapon")
+	bool isAimingC = false;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Player|Weapon")
+	bool isShootingC = false;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Player|Weapon")
+	bool isReloadingC = false;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Player|Weapon")
+	bool hasWeaponC = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player|Weapon")
+	TSubclassOf<AWeapon> weaponClass;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player|Weapon")
+	AWeapon* weaponC;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player|Weapon")
+	USkeletalMeshComponent* playerMesh;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player|Camera")
+	float socketZ_Zoomed_Out = 0.0;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player|Camera")
+	float socketZ_Zoomed_In = -15.0;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player|Camera")
+	float socketY_Zoomed_Out = 0.0;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player|Camera")
+	float socketY_Zoomed_In = 50.0;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player|Camera")
+	float cameraboom_Zoomed_Out = 400.0;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player|Camera")
+	float cameraboom_Zoomed_In = 300.0;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player|Camera")
+	USpringArmComponent* springArm;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player|Camera")
+	TSubclassOf<UUserWidget> HUDClass;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player|Camera")
+	UUserWidget* HUD;
+
+	UPROPERTY(BlueprintAssignable, BlueprintCallable, Category = "Events")
+	FUpdateHealth UpdateHealth;
+
+	UPROPERTY(BlueprintAssignable, BlueprintCallable, Category = "Events")
+	FUpdateHealth UpdateAmmo;
+
+	UPROPERTY(BlueprintAssignable, BlueprintCallable, Category = "Events")
+	FUpdateKills UpdateKills;
+
+	UPROPERTY(BlueprintAssignable, Category = "Events")
+	FPlayerDeath PlayerDeath;
+
 protected:
+
+	float burnTime = 0.0;
+	bool isBurning = false;
+
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+
+private:
+
+	FCriticalSection BurnLock; //Thread lock
 
 public:	
 	// Called every frame
@@ -25,5 +124,23 @@ public:
 
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+
+	UFUNCTION(BlueprintCallable, Category = "Weapon")
+	void DoGetWeapon();
+
+	UFUNCTION(BlueprintCallable, Category = "Weapon")
+	void DoShoot();
+
+	UFUNCTION(BlueprintCallable, Category = "Weapon")
+	void DoAim(float alpha);
+
+	UFUNCTION(BlueprintCallable, Category = "Weapon")
+	void DoReload();
+
+	UFUNCTION(BlueprintCallable, Category = "Health")
+	void BurnDamage(float timeOnFire, bool burning);
+
+	UFUNCTION(BlueprintCallable, Category = "Health")
+	void ResetPlayer();
 
 };
