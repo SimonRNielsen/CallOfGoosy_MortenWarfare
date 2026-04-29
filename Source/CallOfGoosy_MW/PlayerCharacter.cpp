@@ -24,6 +24,7 @@ void APlayerCharacter::BeginPlay()
 
 	for (USkeletalMeshComponent* mesh : meshes)
 	{
+
 		if (mesh->GetName() == "CharacterMesh0")
 		{
 
@@ -31,19 +32,20 @@ void APlayerCharacter::BeginPlay()
 			break; //Early break if the mesh is found (should be first entry -> root)
 
 		}
+
 	}
 
 	DoGetWeapon(); //Calls the function to spawn and attach the weapon to the player
 
-	if (IsValid(HUDClass))
+	if (IsValid(HUDClass)) //Only tries to create UI if the class has been set in the editor
 	{
 
-		HUD = CreateWidget<UUserWidget>(GetWorld(), HUDClass);
+		HUD = CreateWidget<UUserWidget>(GetWorld(), HUDClass); //"Spawns" and sets HUD/UI Widget
 
 		if (IsValid(HUD))
 		{
 
-			HUD->AddToViewport();
+			HUD->AddToViewport(); //Sets UI to be displayed on camera
 
 		}
 
@@ -115,10 +117,17 @@ void APlayerCharacter::DoShoot()
 void APlayerCharacter::DoAim(float alpha)
 {
 
-	if (!IsValid(springArm) || !hasWeaponC || !IsAlive)
+	if (!IsValid(springArm) || !hasWeaponC)
 	{
 
 		return;
+
+	}
+
+	if (!IsAlive)
+	{
+
+		alpha = 0.0f;
 
 	}
 
@@ -152,7 +161,7 @@ void APlayerCharacter::DoReload()
 void APlayerCharacter::BurnDamage(float timeOnFire, bool burning)
 {
 
-	FScopeLock Lock(&BurnLock);
+	FScopeLock Lock(&BurnLock); //Thread lock for entire function (unlocks when completed), prevents edge cases of new burn effect starting before a ending effect has finished (yes - it actually happened)
 
 	if (!IsAlive)
 	{
@@ -186,6 +195,7 @@ void APlayerCharacter::BurnDamage(float timeOnFire, bool burning)
 	burnTime += timeOnFire; //Adds the time from blueprint timeline to the burnTime variable (used to determine when to take damage)
 
 	bool update = false;
+	bool makeAuchSound = false;
 
 	while (burnTime >= tickInterval) //Applies burn damage comparable to the amount of ticks the player is on fire, and reduces health by "fireDamage" and timer 
 	{
@@ -193,6 +203,15 @@ void APlayerCharacter::BurnDamage(float timeOnFire, bool burning)
 		burnTime -= tickInterval;
 		health -= fireDamage;
 		update = true;
+		damageTaken += fireDamage;
+
+		if (damageTaken >= damageBeforeComplaint)
+		{
+
+			damageTaken -= damageBeforeComplaint;
+			makeAuchSound = true;
+
+		}
 
 	}
 
@@ -203,10 +222,17 @@ void APlayerCharacter::BurnDamage(float timeOnFire, bool burning)
 
 	}
 
+	if (makeAuchSound)
+	{
+
+		AuchSound.Broadcast(); //Tells player to make auch sound because of amount of damage taken
+
+	}
+
 	if (health <= 0 && IsAlive) //Checks if the players health has reached 0 or below, and triggers death logic if so
 	{
 
-		IsAlive = false;
+		IsAlive = false; //Blocks certain actions and checks
 		PlayerDeath.Broadcast(); //Broadcasts custom event dispatcher (signals players death)
 		burnTime = 0.0f; //Removes excess accumulated time so if pawn gets reset it will not get any "undeserved" damage
 
@@ -221,15 +247,25 @@ void APlayerCharacter::BurnDamage(float timeOnFire, bool burning)
 
 }
 
-void APlayerCharacter::ResetPlayer()
+void APlayerCharacter::ResetPlayer() //Reset function to reset all parameters for restarting
 {
 
-	playerMesh->SetVisibility(true, true);
+	if (IsValid(playerMesh))
+	{
+
+		playerMesh->SetVisibility(true, true);
+
+	}
 
 	IsAlive = true;
 	health = maxHealth;
 
-	UpdateHealth.Broadcast();
+	if (IsValid(HUD))
+	{
+
+		UpdateHealth.Broadcast();
+
+	}
 
 	if (IsValid(burnEffect))
 	{
@@ -243,6 +279,8 @@ void APlayerCharacter::ResetPlayer()
 	isReloadingC = false;
 	isBurning = false;
 
+	DoAim(0.0f);
+
 	if (IsValid(weaponC))
 	{
 
@@ -252,7 +290,13 @@ void APlayerCharacter::ResetPlayer()
 			hasWeaponC = true;
 			weaponC->GunMesh->SetVisibility(true);
 			weaponC->ammo = weaponC->maxAmmo;
-			UpdateAmmo.Broadcast();
+
+			if (IsValid(HUD))
+			{
+
+				UpdateAmmo.Broadcast();
+
+			}
 
 		}
 

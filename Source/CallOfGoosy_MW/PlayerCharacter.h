@@ -13,11 +13,13 @@
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FUpdateHealth);
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FPlayerDeath);
+
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FUpdateAmmo);
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FUpdateKills);
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FPlayerDeath);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FPlayDamagedSound);
 
 UCLASS()
 class CALLOFGOOSY_MW_API APlayerCharacter : public ACharacter
@@ -33,6 +35,9 @@ public:
 
 	UPROPERTY(EditAnyWhere, BlueprintReadWrite, Category = "Player|Health")
 	int maxHealth = 100;
+
+	UPROPERTY(EditAnyWhere, BlueprintReadWrite, Category = "Player|Health")
+	int damageBeforeComplaint = 10;
 
 	UPROPERTY(EditAnyWhere, BlueprintReadWrite, Category = "Player|Health")
 	int fireDamage = 5;
@@ -106,10 +111,14 @@ public:
 	UPROPERTY(BlueprintAssignable, Category = "Events")
 	FPlayerDeath PlayerDeath;
 
+	UPROPERTY(BlueprintAssignable, Category = "Events")
+	FPlayDamagedSound AuchSound;
+
 protected:
 
-	float burnTime = 0.0;
+	float burnTime = 0.0f;
 	bool isBurning = false;
+	int damageTaken = 0;
 
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
