@@ -195,6 +195,7 @@ void APlayerCharacter::BurnDamage(float timeOnFire, bool burning)
 	burnTime += timeOnFire; //Adds the time from blueprint timeline to the burnTime variable (used to determine when to take damage)
 
 	bool update = false;
+	bool makeAuchSound = false;
 
 	while (burnTime >= tickInterval) //Applies burn damage comparable to the amount of ticks the player is on fire, and reduces health by "fireDamage" and timer 
 	{
@@ -202,6 +203,15 @@ void APlayerCharacter::BurnDamage(float timeOnFire, bool burning)
 		burnTime -= tickInterval;
 		health -= fireDamage;
 		update = true;
+		damageTaken += fireDamage;
+
+		if (damageTaken >= damageBeforeComplaint)
+		{
+
+			damageTaken -= damageBeforeComplaint;
+			makeAuchSound = true;
+
+		}
 
 	}
 
@@ -209,6 +219,13 @@ void APlayerCharacter::BurnDamage(float timeOnFire, bool burning)
 	{
 
 		UpdateHealth.Broadcast(); //Broadcasts custom event dispatcher (signals HUD to update healthbar)
+
+	}
+
+	if (makeAuchSound)
+	{
+
+		AuchSound.Broadcast(); //Tells player to make auch sound because of amount of damage taken
 
 	}
 
