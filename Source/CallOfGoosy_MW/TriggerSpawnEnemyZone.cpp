@@ -37,7 +37,7 @@ void ATriggerSpawnEnemyZone::OnOverlapBegin(class UPrimitiveComponent* Overlappe
 {
 	if (GEngine)
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("Overlab Gegin"));
+		//GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("Overlab Gegin"));
 	}
 }
 
@@ -46,7 +46,7 @@ void ATriggerSpawnEnemyZone::OnOverlapEnd(class UPrimitiveComponent* OverlappedC
 {
 	if (GEngine)
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("Overlap End"));
+		//GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("Overlap End"));
 	}
 }
 
