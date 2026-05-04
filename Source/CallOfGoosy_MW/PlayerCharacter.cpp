@@ -65,7 +65,7 @@ void APlayerCharacter::Tick(float DeltaTime)
 	if (TimeSinceLastSprint >= TimeBeforeRegainingStamina)
 	{
 
-		Stamina = UKismetMathLibrary::FClamp(Stamina + StaminaRegenRate, 0.0f, 1.0f); 
+		Stamina = UKismetMathLibrary::FClamp(Stamina + StaminaRegenRate, 0.0f, 1.0f);
 
 	}
 
@@ -329,7 +329,7 @@ void APlayerCharacter::Sprint(bool trySprint)
 	if (trySprint)
 	{
 
-		if (Stamina > 0.0f && !isAimingC && !isReloadingC) 
+		if (Stamina > 0.0f && !isAimingC && !isReloadingC)
 		{
 
 			Stamina -= StaminaDrainRate;
@@ -362,5 +362,23 @@ void APlayerCharacter::StartFire_Implementation()
 {
 
 	StartFire.Broadcast();
+
+}
+
+
+void APlayerCharacter::Interact()
+{
+
+	if (IsValid(Interactable))
+	{
+
+		if (Interactable->Implements<UIInteractable>())
+		{
+
+			IIInteractable::Execute_Interact(Interactable, this); 
+
+		}
+
+	}
 
 }

@@ -6,12 +6,14 @@
 #include "GameFramework/Character.h"
 #include "Weapon.h"
 #include "IBurnable.h"
+#include "IInteractable.h"
 #include "NiagaraComponent.h"
 #include "Camera/CameraComponent.h"
 #include "Blueprint/UserWidget.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "Kismet/KismetSystemLibrary.h"
 #include "PlayerCharacter.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FUpdateHealth);
@@ -138,6 +140,9 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player|Camera")
 	UUserWidget* HUD;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Player|Interaction")
+	AActor* Interactable;
+
 	UPROPERTY(BlueprintAssignable, BlueprintCallable, Category = "Events")
 	FUpdateHealth UpdateHealth;
 
@@ -206,5 +211,8 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Health")
 	virtual void StartFire_Implementation() override;
+
+	UFUNCTION(BlueprintCallable, Category = "Interaction")
+	void Interact();
 
 };
