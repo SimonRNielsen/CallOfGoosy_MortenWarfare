@@ -29,5 +29,8 @@
 			"Name": "ProceduralVegetationEditor",
 			"Enabled": true
 		}
+	],
+	"TargetPlatforms": [
+		"Windows"
 	]
 }
