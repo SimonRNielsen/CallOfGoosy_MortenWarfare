@@ -5,10 +5,13 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "Weapon.h"
+#include "IBurnable.h"
 #include "NiagaraComponent.h"
 #include "Camera/CameraComponent.h"
 #include "Blueprint/UserWidget.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
+#include "Kismet/KismetMathLibrary.h"
 #include "PlayerCharacter.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FUpdateHealth);
@@ -23,8 +26,12 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE(FPlayDamagedSound);
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOpenMenu);
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FStartGame);
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FStartFire);
+
 UCLASS()
-class CALLOFGOOSY_MW_API APlayerCharacter : public ACharacter
+class CALLOFGOOSY_MW_API APlayerCharacter : public ACharacter, public IIBurnable
 {
 	GENERATED_BODY()
 
@@ -53,6 +60,33 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Player|Health")
 	bool IsAlive = true;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Player|Health")
+	bool TookDamageThisTick = false;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player|Movement")
+	bool IsSprinting = false;
+
+	UPROPERTY(EditAnyWhere, BlueprintReadWrite, Category = "Player|Movement")
+	float MaxMovespeedAiming = 100.0f;
+
+	UPROPERTY(EditAnyWhere, BlueprintReadWrite, Category = "Player|Movement")
+	float MaxMovespeedWalking = 375.0f;
+
+	UPROPERTY(EditAnyWhere, BlueprintReadWrite, Category = "Player|Movement")
+	float MaxMovespeedSprinting = 600.0f;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Player|Movement")
+	float Stamina = 1.0f;
+
+	UPROPERTY(EditAnyWhere, BlueprintReadWrite, Category = "Player|Movement")
+	float StaminaDrainRate = 0.005f;
+
+	UPROPERTY(EditAnyWhere, BlueprintReadWrite, Category = "Player|Movement")
+	float StaminaRegenRate = 0.01f;
+
+	UPROPERTY(EditAnyWhere, BlueprintReadWrite, Category = "Player|Movement")
+	float TimeBeforeRegainingStamina = 3.0f;
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Player|Weapon")
 	bool isAimingC = false;
 
@@ -74,22 +108,25 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player|Weapon")
 	USkeletalMeshComponent* playerMesh;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player|Camera")
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Player|Camera")
+	bool MenuOpen = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player|Camera")
 	float socketZ_Zoomed_Out = 0.0;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player|Camera")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player|Camera")
 	float socketZ_Zoomed_In = -15.0;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player|Camera")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player|Camera")
 	float socketY_Zoomed_Out = 0.0;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player|Camera")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player|Camera")
 	float socketY_Zoomed_In = 50.0;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player|Camera")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player|Camera")
 	float cameraboom_Zoomed_Out = 400.0;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player|Camera")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player|Camera")
 	float cameraboom_Zoomed_In = 300.0;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player|Camera")
@@ -119,9 +156,16 @@ public:
 	UPROPERTY(BlueprintAssignable, BlueprintCallable, Category = "Events")
 	FOpenMenu OpenMenu;
 
+	UPROPERTY(BlueprintAssignable, BlueprintCallable, Category = "Events")
+	FStartGame StartGame;
+
+	UPROPERTY(BlueprintAssignable, BlueprintCallable, Category = "Events")
+	FStartFire StartFire;
+
 protected:
 
 	float burnTime = 0.0f;
+	float TimeSinceLastSprint = 0.0f;
 	bool isBurning = false;
 	int damageTaken = 0;
 
@@ -156,5 +200,11 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Health")
 	void ResetPlayer();
+
+	UFUNCTION(BlueprintCallable, Category = "Health")
+	void Sprint(bool trySprint);
+
+	UFUNCTION(BlueprintCallable, Category = "Health")
+	virtual void StartFire_Implementation() override;
 
 };

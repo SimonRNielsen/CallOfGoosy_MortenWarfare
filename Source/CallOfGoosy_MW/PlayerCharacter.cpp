@@ -59,6 +59,16 @@ void APlayerCharacter::Tick(float DeltaTime)
 
 	Super::Tick(DeltaTime);
 
+	TookDamageThisTick = false;
+	TimeSinceLastSprint += DeltaTime;
+
+	if (TimeSinceLastSprint >= TimeBeforeRegainingStamina)
+	{
+
+		Stamina = UKismetMathLibrary::FClamp(Stamina + StaminaRegenRate, 0.0f, 1.0f); 
+
+	}
+
 }
 
 // Called to bind functionality to input
@@ -97,6 +107,13 @@ void APlayerCharacter::DoGetWeapon()
 
 void APlayerCharacter::DoShoot()
 {
+
+	if (GetCharacterMovement()->IsFalling() || IsSprinting)
+	{
+
+		return;
+
+	}
 
 	if (hasWeaponC && isAimingC && IsValid(weaponC) && IsAlive) //Checks if the player has a weapon, is aiming, and that the weapon is set and exists
 	{
@@ -278,6 +295,7 @@ void APlayerCharacter::ResetPlayer() //Reset function to reset all parameters fo
 	isShootingC = false;
 	isReloadingC = false;
 	isBurning = false;
+	Stamina = 1.0f;
 
 	DoAim(0.0f);
 
@@ -301,5 +319,48 @@ void APlayerCharacter::ResetPlayer() //Reset function to reset all parameters fo
 		}
 
 	}
+
+}
+
+
+void APlayerCharacter::Sprint(bool trySprint)
+{
+
+	if (trySprint)
+	{
+
+		if (Stamina > 0.0f && !isAimingC && !isReloadingC) 
+		{
+
+			Stamina -= StaminaDrainRate;
+			IsSprinting = trySprint;
+			GetCharacterMovement()->MaxWalkSpeed = MaxMovespeedSprinting;
+			TimeSinceLastSprint = 0.0f;
+
+		}
+		else
+		{
+
+			IsSprinting = false;
+			GetCharacterMovement()->MaxWalkSpeed = MaxMovespeedWalking;
+
+		}
+
+	}
+	else
+	{
+
+		IsSprinting = trySprint;
+		GetCharacterMovement()->MaxWalkSpeed = MaxMovespeedWalking;
+
+	}
+
+}
+
+
+void APlayerCharacter::StartFire_Implementation()
+{
+
+	StartFire.Broadcast();
 
 }
