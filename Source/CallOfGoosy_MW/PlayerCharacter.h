@@ -21,6 +21,8 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE(FUpdateKills);
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FPlayDamagedSound);
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOpenMenu);
+
 UCLASS()
 class CALLOFGOOSY_MW_API APlayerCharacter : public ACharacter
 {
@@ -113,6 +115,9 @@ public:
 
 	UPROPERTY(BlueprintAssignable, Category = "Events")
 	FPlayDamagedSound AuchSound;
+
+	UPROPERTY(BlueprintAssignable, BlueprintCallable, Category = "Events")
+	FOpenMenu OpenMenu;
 
 protected:
 
