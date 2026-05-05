@@ -108,7 +108,7 @@ void APlayerCharacter::DoGetWeapon()
 void APlayerCharacter::DoShoot()
 {
 
-	if (GetCharacterMovement()->IsFalling() || IsSprinting)
+	if (GetCharacterMovement()->IsFalling() || IsSprinting || IsInteracting)
 	{
 
 		return;
@@ -141,7 +141,7 @@ void APlayerCharacter::DoAim(float alpha)
 
 	}
 
-	if (!IsAlive)
+	if (!IsAlive || IsInteracting)
 	{
 
 		alpha = 0.0f;
@@ -166,7 +166,7 @@ void APlayerCharacter::DoAim(float alpha)
 void APlayerCharacter::DoReload()
 {
 
-	if (IsValid(weaponC) && hasWeaponC && !isReloadingC && !isShootingC && IsAlive) //Checks if the player has a valid weapon and not already shooting or reloading
+	if (IsValid(weaponC) && hasWeaponC && !isReloadingC && !isShootingC && IsAlive && !IsInteracting) //Checks if the player has a valid weapon and not already shooting or reloading
 	{
 
 		isReloadingC = true; //Sets reloading state to true, which triggers the reload animation and blocks other usage of the weapon until the reload is finished (reset by animation notify)
@@ -295,6 +295,7 @@ void APlayerCharacter::ResetPlayer() //Reset function to reset all parameters fo
 	isShootingC = false;
 	isReloadingC = false;
 	isBurning = false;
+	IsInteracting = false;
 	Stamina = 1.0f;
 
 	DoAim(0.0f);
@@ -369,13 +370,14 @@ void APlayerCharacter::StartFire_Implementation()
 void APlayerCharacter::Interact()
 {
 
-	if (IsValid(Interactable))
+	if (IsValid(Interactable) && !GetCharacterMovement()->IsFalling())
 	{
 
 		if (Interactable->Implements<UIInteractable>())
 		{
 
-			IIInteractable::Execute_Interact(Interactable, this); 
+			IIInteractable::Execute_Interact(Interactable, this);
+			IsInteracting = true;
 
 		}
 

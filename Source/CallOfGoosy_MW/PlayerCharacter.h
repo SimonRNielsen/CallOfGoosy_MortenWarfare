@@ -143,6 +143,9 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Player|Interaction")
 	AActor* Interactable;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Player|Interaction")
+	bool IsInteracting = false;
+
 	UPROPERTY(BlueprintAssignable, BlueprintCallable, Category = "Events")
 	FUpdateHealth UpdateHealth;
 
