@@ -296,7 +296,10 @@ void APlayerCharacter::ResetPlayer() //Reset function to reset all parameters fo
 	isReloadingC = false;
 	isBurning = false;
 	IsInteracting = false;
+	IsSprinting = false;
 	Stamina = 1.0f;
+
+	GetCharacterMovement()->MaxWalkSpeed = MaxMovespeedWalking;
 
 	DoAim(0.0f);
 

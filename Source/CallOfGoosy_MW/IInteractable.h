@@ -27,4 +27,7 @@ public:
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Interactable")
 	void Interact(APlayerCharacter* interactor);
 
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Interactable")
+	FText GetTooltip();
+
 };
