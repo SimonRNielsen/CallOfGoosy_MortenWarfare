@@ -378,6 +378,7 @@ void APlayerCharacter::Interact()
 
 			IIInteractable::Execute_Interact(Interactable, this);
 			IsInteracting = true;
+			GetCharacterMovement()->MaxWalkSpeed = MaxMovespeedAiming;
 
 		}
 
