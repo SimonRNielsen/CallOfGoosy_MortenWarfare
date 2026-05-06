@@ -6,6 +6,7 @@
 #include "GameFramework/Actor.h"
 #include "Engine/Engine.h"
 #include "Components/BoxComponent.h"
+#include "Enemy.h"
 #include "TriggerSpawnPointZone.generated.h"
 
 UCLASS()
@@ -22,8 +23,14 @@ protected:
 	virtual void BeginPlay() override;
 
 	//Collisionbox
-	UPROPERTY(VisibleAnywhere /*BlueprintReadWrite, Category = "SpawnPoint|Collisionbox"*/);
+	UPROPERTY(VisibleAnywhere);
 	UBoxComponent* CollisionComponent;
+
+	UPROPERTY(VisibleAnywhere, Category = "TriggerSpawnPointZone|ActiveEnmeis")
+	TArray<AActor*> ActiveActors;
+
+	UPROPERTY(VisibleAnywhere, Category = "TriggerSpawnPointZone|InactiveEnemies")
+	TArray<AActor*> InactiveActors;
 
 	/** called when something enters the sphere component */
 	UFUNCTION()
@@ -39,4 +46,13 @@ public:
 
 	UFUNCTION(BlueprintImplementableEvent, Category = "TriggerSpawnPointZone|SpawnActor")
 	void HandleEnemySpawn();
+
+	UFUNCTION(BlueprintCallable, Category = "TriggerSpawnPointZone|InactiveActor")
+	void MoveToInactivePool(class AActor* DeadActor);
+
+	UFUNCTION(BlueprintCallable, Category = "TriggerSpawnPointZone|ActiveActor")
+	void MoveToActivePool(FTransform spawnTransform);
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "TriggerSpawnPointZone|Ennemy")
+	TSubclassOf<AEnemy> enemyClass;
 };
