@@ -45,7 +45,7 @@ void ATriggerSpawnPointZone::OnOverlapEnd(class UPrimitiveComponent* OverlappedC
 {
 	if (GEngine)
 	{
-		//GEngine->AdkdOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("Overlap End"));
+		//GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("Overlap End"));
 	}
 }
 
@@ -57,15 +57,15 @@ void ATriggerSpawnPointZone::MoveToInactivePool(class AActor* DeadActor)
 	InactiveActors.Add(DeadActor);
 
 	ActiveActors.Remove(DeadActor);
+
+	//UE_LOG(LogTemp, Warning, TEXT("Inactive pool: %d"), InactiveActors.Num());
 }
 
 void ATriggerSpawnPointZone::MoveToActivePool(FTransform spawnTransform)
 {
 	if (InactiveActors.Num() == 0)
 	{
-		FActorSpawnParameters parameters; //Used for setting additional spawnparameters
-		GetWorld()->SpawnActor<AEnemy>(enemyClass, spawnTransform, parameters); //Sets the pointer while spawning the weapon at the same time
-
+		SpawnEnemy(spawnTransform);
 	}
 	else
 	{
@@ -77,4 +77,11 @@ void ATriggerSpawnPointZone::MoveToActivePool(FTransform spawnTransform)
 
 		AliveAcctor->SetActorTransform(spawnTransform);
 	}
+}
+
+void ATriggerSpawnPointZone::SpawnEnemy(FTransform spawnTransform)
+{
+	FActorSpawnParameters parameters; //Used for setting additional spawnparameters
+	AEnemy* newEnemy = GetWorld()->SpawnActor<AEnemy>(enemyClass, spawnTransform, parameters); //Sets the pointer while spawning the new enemyn at the same time
+	newEnemy->parent = this; //Setting this as parent for the newEnemy
 }

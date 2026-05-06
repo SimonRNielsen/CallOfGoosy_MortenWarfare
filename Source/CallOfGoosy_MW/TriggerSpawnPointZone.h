@@ -55,4 +55,7 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "TriggerSpawnPointZone|Ennemy")
 	TSubclassOf<AEnemy> enemyClass;
+
+	UFUNCTION(Category = "TriggerSpawnPointZone|SpawnActor")
+	void SpawnEnemy(FTransform spawnTransform);
 };
