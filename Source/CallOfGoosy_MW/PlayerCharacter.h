@@ -155,7 +155,7 @@ public:
 	UPROPERTY(BlueprintAssignable, BlueprintCallable, Category = "Events")
 	FUpdateKills UpdateKills;
 
-	UPROPERTY(BlueprintAssignable, Category = "Events")
+	UPROPERTY(BlueprintAssignable, BlueprintCallable, Category = "Events")
 	FPlayerDeath PlayerDeath;
 
 	UPROPERTY(BlueprintAssignable, Category = "Events")
@@ -217,5 +217,8 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Interaction")
 	void Interact();
+
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Health")
+	void Die();
 
 };

@@ -257,7 +257,8 @@ void APlayerCharacter::BurnDamage(float timeOnFire, bool burning)
 	{
 
 		IsAlive = false; //Blocks certain actions and checks
-		PlayerDeath.Broadcast(); //Broadcasts custom event dispatcher (signals players death)
+		//PlayerDeath.Broadcast(); //Broadcasts custom event dispatcher (signals players death)
+		Die(); //Calls the Die function that signals the blueprint event for death
 		burnTime = 0.0f; //Removes excess accumulated time so if pawn gets reset it will not get any "undeserved" damage
 
 		if (IsValid(burnEffect))
@@ -306,6 +307,7 @@ void APlayerCharacter::ResetPlayer() //Reset function to reset all parameters fo
 	IsSprinting = false;
 	Stamina = 1.0f;
 
+	GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Walking); //Resets movement mode
 	GetCharacterMovement()->MaxWalkSpeed = MaxMovespeedWalking;
 
 	DoAim(0.0f);
@@ -396,5 +398,13 @@ void APlayerCharacter::Interact()
 		}
 
 	}
+
+}
+
+
+void APlayerCharacter::Die_Implementation()
+{
+
+	//Death logic is handled in blueprint, this function is just used to signal the blueprint event for death
 
 }
