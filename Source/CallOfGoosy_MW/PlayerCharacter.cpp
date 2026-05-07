@@ -159,6 +159,13 @@ void APlayerCharacter::DoAim(float alpha)
 
 	springArm->SocketOffset = FVector(0.0f, FMath::Lerp(socketY_Zoomed_Out, socketY_Zoomed_In, alpha), FMath::Lerp(socketZ_Zoomed_Out, socketZ_Zoomed_In, alpha)); //One-liner of the above calculations
 
+	if (IsInteracting)
+	{
+
+		return;
+
+	}
+
 	bUseControllerRotationYaw = isAimingC; //Determines whether the character should rotate with the controller when aiming
 
 }
@@ -373,7 +380,7 @@ void APlayerCharacter::StartFire_Implementation()
 void APlayerCharacter::Interact()
 {
 
-	if (IsValid(Interactable) && !GetCharacterMovement()->IsFalling())
+	if (IsValid(Interactable) && !GetCharacterMovement()->IsFalling() && !isReloadingC)
 	{
 
 		if (Interactable->Implements<UIInteractable>())
@@ -381,7 +388,10 @@ void APlayerCharacter::Interact()
 
 			IIInteractable::Execute_Interact(Interactable, this);
 			IsInteracting = true;
-			GetCharacterMovement()->MaxWalkSpeed = MaxMovespeedAiming;
+			isAimingC = false;
+			isShootingC = false;
+			GetCharacterMovement()->StopMovementImmediately();
+			GetCharacterMovement()->DisableMovement();
 
 		}
 
