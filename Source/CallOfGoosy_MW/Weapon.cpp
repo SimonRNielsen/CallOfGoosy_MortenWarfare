@@ -28,6 +28,8 @@ void AWeapon::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	DidHit = false; //Resets "DidHit" every frame, so it's only true for the single frame where a hit is detected
+
 	if (!IsValid(Player)) //Check if player is valid (not null/nullptr and not about to be destroyed)
 	{
 
@@ -163,11 +165,14 @@ void AWeapon::AimDotMovement()
 		FRotator rotationOffset = FRotator(0.0f, 0.0f, 90.0f); //Rotation offset
 		FRotator finalRotation = UKismetMathLibrary::ComposeRotators(impactNormalRotation, rotationOffset); //Combines rotation to get the final rotation for the aimdot
 
+		DidHit = true; //Sets "DidHit" to true to indicate that the HitLocation variable has been updated and the aimdot can be moved to the new location
+		HitLocation = impactPoint; //Sets the "HitLocation" variable to the impact point, which is used for moving the aiming dot
+		/*
 		AimDot->SetWorldLocationAndRotation(impactPoint, finalRotation); //Sets location and rotation from the above calculations
 
 		float newScale = UKismetMathLibrary::FClamp(hitResult.Distance * 0.006f, 1.0f, 10.0f); //Clamps the distance from the player to the hit point between 1 and 10 and multiplies it to set the scale of the aimdot, so it gets bigger the further away it is, to make it more visible at range
 		AimDot->SetWorldScale3D(FVector(newScale, newScale, newScale)); //Sets the scale of the aimdot to the above calculation
-
+		*/
 	}
 
 }

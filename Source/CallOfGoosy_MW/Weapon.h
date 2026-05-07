@@ -53,6 +53,12 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon|Gun")
 	UNiagaraSystem* HitSpark;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Weapon|Gun")
+	FVector HitLocation;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Weapon|Gun")
+	bool DidHit = false;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
