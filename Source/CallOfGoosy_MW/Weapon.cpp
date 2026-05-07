@@ -96,21 +96,21 @@ void AWeapon::Shoot()
 			if (hitResult.BoneName == FName("upper_neck"))
 			{
 
-				UE_LOG(LogTemp, Warning, TEXT("Enemy got hit in upper neck/head!"));
+				//UE_LOG(LogTemp, Warning, TEXT("Enemy got hit in upper neck/head!"));
 				multiplier = HeadShotMultiplier;
 
 			}
 			else if (hitResult.BoneName == FName("lower_neck") || hitResult.BoneName == FName("butt"))
 			{
 
-				UE_LOG(LogTemp, Warning, TEXT("Enemy got hit in lower neck/body!"));
+				//UE_LOG(LogTemp, Warning, TEXT("Enemy got hit in lower neck/body!"));
 				multiplier = BodyShotMultiplier;
 
 			}
 			else
 			{
 
-				UE_LOG(LogTemp, Warning, TEXT("Enemy got hit in %s"), *hitResult.BoneName.ToString());
+				//UE_LOG(LogTemp, Warning, TEXT("Enemy got hit in %s"), *hitResult.BoneName.ToString());
 				multiplier = ShotMultiplier;
 
 			}
