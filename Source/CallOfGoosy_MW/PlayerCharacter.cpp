@@ -59,7 +59,13 @@ void APlayerCharacter::Tick(float DeltaTime)
 
 	Super::Tick(DeltaTime);
 
-	TookDamageThisTick = false;
+	if (!IsInvulnerable)
+	{
+
+		TookDamageThisTick = false;
+
+	}
+
 	TimeSinceLastSprint += DeltaTime;
 
 	if (TimeSinceLastSprint >= TimeBeforeRegainingStamina)

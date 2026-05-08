@@ -65,6 +65,9 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Player|Health")
 	bool TookDamageThisTick = false;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Player|Health")
+	bool IsInvulnerable = false;
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player|Movement")
 	bool IsSprinting = false;
 
