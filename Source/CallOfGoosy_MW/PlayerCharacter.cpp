@@ -59,6 +59,16 @@ void APlayerCharacter::Tick(float DeltaTime)
 
 	Super::Tick(DeltaTime);
 
+	TookDamageThisTick = false;
+	TimeSinceLastSprint += DeltaTime;
+
+	if (TimeSinceLastSprint >= TimeBeforeRegainingStamina)
+	{
+
+		Stamina = UKismetMathLibrary::FClamp(Stamina + StaminaRegenRate, 0.0f, 1.0f);
+
+	}
+
 }
 
 // Called to bind functionality to input
@@ -98,6 +108,13 @@ void APlayerCharacter::DoGetWeapon()
 void APlayerCharacter::DoShoot()
 {
 
+	if (GetCharacterMovement()->IsFalling() || IsSprinting || IsInteracting)
+	{
+
+		return;
+
+	}
+
 	if (hasWeaponC && isAimingC && IsValid(weaponC) && IsAlive) //Checks if the player has a weapon, is aiming, and that the weapon is set and exists
 	{
 
@@ -124,7 +141,7 @@ void APlayerCharacter::DoAim(float alpha)
 
 	}
 
-	if (!IsAlive)
+	if (!IsAlive || IsInteracting)
 	{
 
 		alpha = 0.0f;
@@ -142,6 +159,13 @@ void APlayerCharacter::DoAim(float alpha)
 
 	springArm->SocketOffset = FVector(0.0f, FMath::Lerp(socketY_Zoomed_Out, socketY_Zoomed_In, alpha), FMath::Lerp(socketZ_Zoomed_Out, socketZ_Zoomed_In, alpha)); //One-liner of the above calculations
 
+	if (IsInteracting)
+	{
+
+		return;
+
+	}
+
 	bUseControllerRotationYaw = isAimingC; //Determines whether the character should rotate with the controller when aiming
 
 }
@@ -149,7 +173,7 @@ void APlayerCharacter::DoAim(float alpha)
 void APlayerCharacter::DoReload()
 {
 
-	if (IsValid(weaponC) && hasWeaponC && !isReloadingC && !isShootingC && IsAlive) //Checks if the player has a valid weapon and not already shooting or reloading
+	if (IsValid(weaponC) && hasWeaponC && !isReloadingC && !isShootingC && IsAlive && !IsInteracting) //Checks if the player has a valid weapon and not already shooting or reloading
 	{
 
 		isReloadingC = true; //Sets reloading state to true, which triggers the reload animation and blocks other usage of the weapon until the reload is finished (reset by animation notify)
@@ -233,7 +257,8 @@ void APlayerCharacter::BurnDamage(float timeOnFire, bool burning)
 	{
 
 		IsAlive = false; //Blocks certain actions and checks
-		PlayerDeath.Broadcast(); //Broadcasts custom event dispatcher (signals players death)
+		//PlayerDeath.Broadcast(); //Broadcasts custom event dispatcher (signals players death)
+		Die(); //Calls the Die function that signals the blueprint event for death
 		burnTime = 0.0f; //Removes excess accumulated time so if pawn gets reset it will not get any "undeserved" damage
 
 		if (IsValid(burnEffect))
@@ -278,6 +303,12 @@ void APlayerCharacter::ResetPlayer() //Reset function to reset all parameters fo
 	isShootingC = false;
 	isReloadingC = false;
 	isBurning = false;
+	IsInteracting = false;
+	IsSprinting = false;
+	Stamina = 1.0f;
+
+	GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Walking); //Resets movement mode
+	GetCharacterMovement()->MaxWalkSpeed = MaxMovespeedWalking;
 
 	DoAim(0.0f);
 
@@ -301,5 +332,79 @@ void APlayerCharacter::ResetPlayer() //Reset function to reset all parameters fo
 		}
 
 	}
+
+}
+
+
+void APlayerCharacter::Sprint(bool trySprint)
+{
+
+	if (trySprint)
+	{
+
+		if (Stamina > 0.0f && !isAimingC && !isReloadingC)
+		{
+
+			Stamina -= StaminaDrainRate;
+			IsSprinting = trySprint;
+			GetCharacterMovement()->MaxWalkSpeed = MaxMovespeedSprinting;
+			TimeSinceLastSprint = 0.0f;
+
+		}
+		else
+		{
+
+			IsSprinting = false;
+			GetCharacterMovement()->MaxWalkSpeed = MaxMovespeedWalking;
+
+		}
+
+	}
+	else
+	{
+
+		IsSprinting = trySprint;
+		GetCharacterMovement()->MaxWalkSpeed = MaxMovespeedWalking;
+
+	}
+
+}
+
+
+void APlayerCharacter::StartFire_Implementation()
+{
+
+	StartFire.Broadcast();
+
+}
+
+
+void APlayerCharacter::Interact()
+{
+
+	if (IsValid(Interactable) && !GetCharacterMovement()->IsFalling() && !isReloadingC)
+	{
+
+		if (Interactable->Implements<UIInteractable>())
+		{
+
+			IIInteractable::Execute_Interact(Interactable, this);
+			IsInteracting = true;
+			isAimingC = false;
+			isShootingC = false;
+			GetCharacterMovement()->StopMovementImmediately();
+			GetCharacterMovement()->DisableMovement();
+
+		}
+
+	}
+
+}
+
+
+void APlayerCharacter::Die_Implementation()
+{
+
+	//Death logic is handled in blueprint, this function is just used to signal the blueprint event for death
 
 }
