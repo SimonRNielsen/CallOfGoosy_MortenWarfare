@@ -9,6 +9,10 @@
 #include "NiagaraFunctionLibrary.h"
 #include "Enemy.generated.h"
 
+
+class ATriggerSpawnPointZone;
+
+
 UCLASS()
 class CALLOFGOOSY_MW_API AEnemy : public ACharacter, public IIShootable
 {
@@ -30,6 +34,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Enemy|Feather")
 	UNiagaraSystem* FeatherEffect;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	ATriggerSpawnPointZone* parent;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -45,5 +52,6 @@ public:
 
 	UFUNCTION(BlueprintImplementableEvent, Category = "Enemy|Health")
 	void HandleDeath();
+
 
 };
