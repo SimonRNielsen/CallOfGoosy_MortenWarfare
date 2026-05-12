@@ -55,6 +55,7 @@ void AEnemy::GetHit_Implementation(int damage, FVector impactPoint, FRotator imp
 
 	}
 
+	//Report the damage event for AI perception system
 	UAISense_Damage::ReportDamageEvent(
 		GetWorld(),
 		this,
