@@ -16,6 +16,8 @@
 #include "Kismet/KismetSystemLibrary.h"
 #include "PlayerCharacter.generated.h"
 
+
+//Declared delegates for events that triggers logic between the Player/UI/Weapon/other actors -> such as updating health, ammo, kills, playing sounds, opening menu, starting game, etc.
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FUpdateHealth);
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FPlayerDeath);

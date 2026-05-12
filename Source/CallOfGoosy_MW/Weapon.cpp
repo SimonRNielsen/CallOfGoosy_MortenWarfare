@@ -2,7 +2,7 @@
 
 #include "Weapon.h"
 #include "PlayerCharacter.h"
-#define ECC_WeaponTrace ECollisionChannel::ECC_GameTraceChannel1
+#define ECC_WeaponTrace ECollisionChannel::ECC_GameTraceChannel1 //Assigned in project settings
 
 // Sets default values
 AWeapon::AWeapon()
@@ -18,7 +18,7 @@ void AWeapon::BeginPlay()
 
 	Super::BeginPlay();
 
-	AimDot = FindComponentByClass<UDecalComponent>();
+	//AimDot = FindComponentByClass<UDecalComponent>();
 	GunMesh = FindComponentByClass<USkeletalMeshComponent>();
 	
 }
@@ -26,6 +26,7 @@ void AWeapon::BeginPlay()
 // Called every frame
 void AWeapon::Tick(float DeltaTime)
 {
+
 	Super::Tick(DeltaTime);
 
 	DidHit = false; //Resets "DidHit" every frame, so it's only true for the single frame where a hit is detected
@@ -44,6 +45,7 @@ void AWeapon::Tick(float DeltaTime)
 
 	}
 
+	/* Deprecated code - component removed from weapon
 	if (IsValid(AimDot)) //Checks if "AimDot" is valid in same manner as "player"  
 	{
 
@@ -56,6 +58,7 @@ void AWeapon::Tick(float DeltaTime)
 		return;
 
 	}
+	*/
 
 	if (!Player->isAimingC) //Early return if the player isn't aiming, since the dot most likely wouldn't be helpful, and only take up performance needlessly then
 	{
@@ -161,22 +164,26 @@ void AWeapon::AimDotMovement()
 	{
 
 		FVector impactPoint = hitResult.ImpactPoint; //Gets the point where the line trace hit the blocking object, used for setting the location of the aiming dot (where the barrel is pointed at)
+
+		DidHit = true; //Sets "DidHit" to true to indicate that the HitLocation variable has been updated and the aimdot can be moved to the new location
+		HitLocation = impactPoint; //Sets the "HitLocation" variable to the impact point, which is used for moving the aiming dot
+
+		/* Deprecated code for moving and aligning aimdot - replaced with a AimDot on UI that is more visible and doesn't leave motionblur unlike the decal component
 		FRotator impactNormalRotation = UKismetMathLibrary::MakeRotFromZ(hitResult.ImpactNormal); //Gets the normal of the hit surface, and converts it to a rotator that can be used for setting the rotation of the aiming dot (so it faces the surface it's hitting) combined with a rotation offset to make it face the player instead of being sideways
 		FRotator rotationOffset = FRotator(0.0f, 0.0f, 90.0f); //Rotation offset
 		FRotator finalRotation = UKismetMathLibrary::ComposeRotators(impactNormalRotation, rotationOffset); //Combines rotation to get the final rotation for the aimdot
 
-		DidHit = true; //Sets "DidHit" to true to indicate that the HitLocation variable has been updated and the aimdot can be moved to the new location
-		HitLocation = impactPoint; //Sets the "HitLocation" variable to the impact point, which is used for moving the aiming dot
-		/*
 		AimDot->SetWorldLocationAndRotation(impactPoint, finalRotation); //Sets location and rotation from the above calculations
 
 		float newScale = UKismetMathLibrary::FClamp(hitResult.Distance * 0.006f, 1.0f, 10.0f); //Clamps the distance from the player to the hit point between 1 and 10 and multiplies it to set the scale of the aimdot, so it gets bigger the further away it is, to make it more visible at range
 		AimDot->SetWorldScale3D(FVector(newScale, newScale, newScale)); //Sets the scale of the aimdot to the above calculation
 		*/
+
 	}
 
 }
 
+//Helper function that sets the parameters in one place for easier maintenance, since it's used for both shooting and aimdot movement. Returns a bool indicating if there was a successful linetrace and "fills" the reference parameter "result" with information about said hit
 bool AWeapon::DoLineTrace(FHitResult& result)
 {
 
@@ -197,7 +204,9 @@ bool AWeapon::DoLineTrace(FHitResult& result)
 	parameters.AddIgnoredActor(this);
 	if (GetOwner())
 	{
+
 		parameters.AddIgnoredActor(GetOwner());
+
 	}
 
 	return GetWorld()->LineTraceSingleByChannel(result, socketLocation, endpoint, ECC_WeaponTrace, parameters); //Line trace (raycast) that simulates a bullet being fired, and detects object that block the bullet (Channel called "WeaponTrace" that is set up in project settings)

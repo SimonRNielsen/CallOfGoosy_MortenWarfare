@@ -12,6 +12,7 @@
 #include "NiagaraFunctionLibrary.h"
 #include "Weapon.generated.h"
 
+//Forward declaration to avoid circular dependency (compiler can't determine which header to include first)
 class APlayerCharacter;
 
 UCLASS()
@@ -29,8 +30,8 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Weapon|Mesh")
 	USkeletalMeshComponent* GunMesh;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Weapon|Gun")
-	UDecalComponent* AimDot;
+	/*UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Weapon|Gun")
+	UDecalComponent* AimDot;*/
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Weapon|Gun")
 	int ammo = 30;
