@@ -53,7 +53,7 @@ void ATriggerSpawnPointZone::MoveToInactivePool(class AActor* DeadActor)
 {
 	DeadActor->GetRootComponent()->Deactivate();
 	DeadActor->GetRootComponent()->SetVisibility(false);
-	
+
 	InactiveActors.Add(DeadActor);
 
 	ActiveActors.Remove(DeadActor);
@@ -61,11 +61,11 @@ void ATriggerSpawnPointZone::MoveToInactivePool(class AActor* DeadActor)
 	//UE_LOG(LogTemp, Warning, TEXT("Inactive pool: %d"), InactiveActors.Num());
 }
 
-void ATriggerSpawnPointZone::MoveToActivePool(FTransform spawnTransform)
+AActor* ATriggerSpawnPointZone::MoveToActivePool(FTransform spawnTransform)
 {
 	if (InactiveActors.Num() == 0)
 	{
-		SpawnEnemy(spawnTransform);
+		return SpawnEnemy(spawnTransform);
 	}
 	else
 	{
@@ -76,12 +76,15 @@ void ATriggerSpawnPointZone::MoveToActivePool(FTransform spawnTransform)
 		AliveAcctor->GetRootComponent()->SetVisibility(true);
 
 		AliveAcctor->SetActorTransform(spawnTransform);
+		return AliveAcctor;
 	}
 }
 
-void ATriggerSpawnPointZone::SpawnEnemy(FTransform spawnTransform)
+AActor* ATriggerSpawnPointZone::SpawnEnemy(FTransform spawnTransform)
 {
 	FActorSpawnParameters parameters; //Used for setting additional spawnparameters
 	AEnemy* newEnemy = GetWorld()->SpawnActor<AEnemy>(enemyClass, spawnTransform, parameters); //Sets the pointer while spawning the new enemyn at the same time
 	newEnemy->parent = this; //Setting this as parent for the newEnemy
+
+	return newEnemy;
 }

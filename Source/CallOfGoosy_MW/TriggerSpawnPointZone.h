@@ -51,11 +51,11 @@ public:
 	void MoveToInactivePool(class AActor* DeadActor);
 
 	UFUNCTION(BlueprintCallable, Category = "TriggerSpawnPointZone|ActiveActor")
-	void MoveToActivePool(FTransform spawnTransform);
+	AActor* MoveToActivePool(FTransform spawnTransform);
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "TriggerSpawnPointZone|Ennemy")
 	TSubclassOf<AEnemy> enemyClass;
 
 	UFUNCTION(Category = "TriggerSpawnPointZone|SpawnActor")
-	void SpawnEnemy(FTransform spawnTransform);
+	AActor* SpawnEnemy(FTransform spawnTransform);
 };
