@@ -62,16 +62,16 @@ void APlayerCharacter::Tick(float DeltaTime)
 	if (!IsInvulnerable)
 	{
 
-		TookDamageThisTick = false;
+		TookDamageThisTick = false; //Enables player to take damage again after having taken damage once last tick (gamedesign choice to not "melt" the player with multiple damage sources trying to apply damage. IsInvulnerable is a buff that is triggered from a powerup, and blocks this bool from being reset until the buff expires
 
 	}
 
-	TimeSinceLastSprint += DeltaTime;
+	TimeSinceLastSprint += DeltaTime; //Timer to track when the player last sprinted, which will then trigger stamina regeneration after a predetermined time (can also be set in the editor)
 
 	if (TimeSinceLastSprint >= TimeBeforeRegainingStamina)
 	{
 
-		Stamina = UKismetMathLibrary::FClamp(Stamina + StaminaRegenRate, 0.0f, 1.0f);
+		Stamina = UKismetMathLibrary::FClamp(Stamina + StaminaRegenRate, 0.0f, 1.0f); //Slowly regenerates the stamina, clamped between 0 (in edge cases where might've dropped way below 0, although that shouldn't be possible) and 1 (full stamina/100%)
 
 	}
 
@@ -114,9 +114,10 @@ void APlayerCharacter::DoGetWeapon()
 void APlayerCharacter::DoShoot()
 {
 
-	if (GetCharacterMovement()->IsFalling() || IsSprinting || IsInteracting)
+	if (GetCharacterMovement()->IsFalling() || IsSprinting || IsInteracting || !IsAlive)
 	{
 
+		isShootingC = false; //Blocks shooting if player is dead or other conditions that might block the animation notification, and resets shooting state in case of edge cases where it might not have been reset properly (like getting killed while shooting and the animation notify not being able to reset it) - yes, that actually happened... causing the player to appear as if shooting himself in the face repeatedly until death animation finished
 		return;
 
 	}
@@ -137,6 +138,7 @@ void APlayerCharacter::DoShoot()
 
 }
 
+//Function that handles lerp effect for moving camera when aiming, alpha is a float given by a timeline in the blueprint that smoothly transitions between 0-1, and is reversed in the same manner when releasing the aim button
 void APlayerCharacter::DoAim(float alpha)
 {
 
@@ -150,21 +152,23 @@ void APlayerCharacter::DoAim(float alpha)
 	if (!IsAlive || IsInteracting)
 	{
 
-		alpha = 0.0f;
+		bUseControllerRotationYaw = false;
+		alpha = 0.0f; //If the player is dead or interacting, it forces the camera to be in the default position (not zoomed in, no over-the-shoulder) by setting alpha to 0, which is used for lerping between the two states of the camera
 
 	}
 
-	springArm->TargetArmLength = FMath::Lerp(cameraboom_Zoomed_Out, cameraboom_Zoomed_In, alpha); //Lerps between the two values for a zoom in/out effect
-
-	/* Deprecated to one-liner below
+	/* Deprecated to one-liner below - kept for readability
 	double newSocketY = FMath::Lerp(socketY_Zoomed_Out, socketY_Zoomed_In, alpha); //Lerps between the two values for a over-the-shoulder effect
 	double newSocketZ = FMath::Lerp(socketZ_Zoomed_Out, socketZ_Zoomed_In, alpha); //Same as above but for Z axis
 
 	springArm->SocketOffset = FVector(0.0f, newSocketY, newSocketZ); //Sets the socket offset to the new values
 	*/
 
+	//
 	springArm->SocketOffset = FVector(0.0f, FMath::Lerp(socketY_Zoomed_Out, socketY_Zoomed_In, alpha), FMath::Lerp(socketZ_Zoomed_Out, socketZ_Zoomed_In, alpha)); //One-liner of the above calculations
+	springArm->TargetArmLength = FMath::Lerp(cameraboom_Zoomed_Out, cameraboom_Zoomed_In, alpha); //Lerps between the two values for a zoom in/out effect
 
+	//Blocks player from changing character rotation while interacting by doing a early return before triggering the bool that toggles character rotation with controller (mouse)
 	if (IsInteracting)
 	{
 
@@ -196,7 +200,7 @@ void APlayerCharacter::BurnDamage(float timeOnFire, bool burning)
 	if (!IsAlive)
 	{
 
-		UE_LOG(LogTemp, Warning, TEXT("Attempted burn damage on a player set as dead!"));
+		//UE_LOG(LogTemp, Warning, TEXT("Attempted burn damage on a player set as dead!"));
 		return; //That which is dead, may never die
 
 	}
@@ -233,7 +237,7 @@ void APlayerCharacter::BurnDamage(float timeOnFire, bool burning)
 		burnTime -= tickInterval;
 		health -= fireDamage;
 		update = true;
-		damageTaken += fireDamage;
+		damageTaken += fireDamage; //Used to measure how much damage the player has taken so the damagesound doesn't "spam" every time the player takes damage
 
 		if (damageTaken >= damageBeforeComplaint)
 		{
@@ -262,8 +266,8 @@ void APlayerCharacter::BurnDamage(float timeOnFire, bool burning)
 	if (health <= 0 && IsAlive) //Checks if the players health has reached 0 or below, and triggers death logic if so
 	{
 
-		IsAlive = false; //Blocks certain actions and checks
-		//PlayerDeath.Broadcast(); //Broadcasts custom event dispatcher (signals players death)
+		IsAlive = false; //Blocks several actions and checks
+		//PlayerDeath.Broadcast(); //Broadcasts custom event dispatcher (signals players death) - deprecated since implementation of death animation, it is now triggered by the animation notify instead
 		Die(); //Calls the Die function that signals the blueprint event for death
 		burnTime = 0.0f; //Removes excess accumulated time so if pawn gets reset it will not get any "undeserved" damage
 
@@ -281,6 +285,7 @@ void APlayerCharacter::BurnDamage(float timeOnFire, bool burning)
 void APlayerCharacter::ResetPlayer() //Reset function to reset all parameters for restarting
 {
 
+	//Resets visibility of player mesh (in case it was hidden after death animation)
 	if (IsValid(playerMesh))
 	{
 
@@ -288,9 +293,11 @@ void APlayerCharacter::ResetPlayer() //Reset function to reset all parameters fo
 
 	}
 
+	//Resets health and alive state
 	IsAlive = true;
 	health = maxHealth;
 
+	//Sets the players health correctly on the HUD after reset
 	if (IsValid(HUD))
 	{
 
@@ -298,6 +305,7 @@ void APlayerCharacter::ResetPlayer() //Reset function to reset all parameters fo
 
 	}
 
+	//Stops visual burn effect
 	if (IsValid(burnEffect))
 	{
 
@@ -305,6 +313,7 @@ void APlayerCharacter::ResetPlayer() //Reset function to reset all parameters fo
 
 	}
 
+	//Resetting all states and stamina to default
 	isAimingC = false;
 	isShootingC = false;
 	isReloadingC = false;
@@ -313,11 +322,14 @@ void APlayerCharacter::ResetPlayer() //Reset function to reset all parameters fo
 	IsSprinting = false;
 	Stamina = 1.0f;
 
-	GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Walking); //Resets movement mode
+	//Resetting movement mode and speed to default
+	GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Walking); 
 	GetCharacterMovement()->MaxWalkSpeed = MaxMovespeedWalking;
 
-	DoAim(0.0f);
+	//Resets camera to default position
+	DoAim(0.0f); 
 
+	//Resets weapon, visibility, ammo and animationstate
 	if (IsValid(weaponC))
 	{
 
@@ -341,9 +353,16 @@ void APlayerCharacter::ResetPlayer() //Reset function to reset all parameters fo
 
 }
 
-
+//Triggered by enhanced input action, sends a true when pressed and false when released
 void APlayerCharacter::Sprint(bool trySprint)
 {
+
+	if (!IsAlive)
+	{
+
+		return;
+
+	}
 
 	if (trySprint)
 	{
@@ -351,6 +370,7 @@ void APlayerCharacter::Sprint(bool trySprint)
 		if (Stamina > 0.0f && !isAimingC && !isReloadingC)
 		{
 
+			//Increases speed while sprinting (as long as the player has stamina and not doing incompatible actions like aiming or reloading), and starts draining stamina. Also resets the timer for stamina regeneration
 			Stamina -= StaminaDrainRate;
 			IsSprinting = trySprint;
 			GetCharacterMovement()->MaxWalkSpeed = MaxMovespeedSprinting;
@@ -360,6 +380,7 @@ void APlayerCharacter::Sprint(bool trySprint)
 		else
 		{
 
+			//Sets speed to walking if the player is out of stamina, or tries to sprint while aiming or reloading
 			IsSprinting = false;
 			GetCharacterMovement()->MaxWalkSpeed = MaxMovespeedWalking;
 
@@ -369,6 +390,7 @@ void APlayerCharacter::Sprint(bool trySprint)
 	else
 	{
 
+		//Untoggling sprint, setting speed back to normal
 		IsSprinting = trySprint;
 		GetCharacterMovement()->MaxWalkSpeed = MaxMovespeedWalking;
 
@@ -376,7 +398,7 @@ void APlayerCharacter::Sprint(bool trySprint)
 
 }
 
-
+//Signals event to start timeline for burn damage
 void APlayerCharacter::StartFire_Implementation()
 {
 
@@ -388,12 +410,20 @@ void APlayerCharacter::StartFire_Implementation()
 void APlayerCharacter::Interact()
 {
 
+	if (!IsAlive)
+	{
+
+		return;
+
+	}
+
 	if (IsValid(Interactable) && !GetCharacterMovement()->IsFalling() && !isReloadingC)
 	{
 
 		if (Interactable->Implements<UIInteractable>())
 		{
 
+			//Triggers the interaction function on the interactable object, and sets states to block other actions, movement and animations while interacting - is reenabled from animation notify
 			IIInteractable::Execute_Interact(Interactable, this);
 			IsInteracting = true;
 			isAimingC = false;
