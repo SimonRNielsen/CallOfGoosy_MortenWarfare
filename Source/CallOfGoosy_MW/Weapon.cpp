@@ -118,7 +118,7 @@ void AWeapon::Shoot()
 
 			}
 
-			IIShootable::Execute_GetHit(hitActor, damage * multiplier, hitResult.ImpactPoint, hitResult.ImpactNormal.Rotation()); //Calls the "GetHit" function from the "IShootable" interface on the hit actor, and passes in the damage multiplied by the appropriate multiplier based on where the enemy was hit (head, body, or other). Also informs the target where the hit occured
+			IIShootable::Execute_GetHit(hitActor, damage * multiplier, hitResult.ImpactPoint, hitResult.ImpactNormal.Rotation(), Player); //Calls the "GetHit" function from the "IShootable" interface on the hit actor, and passes in the damage multiplied by the appropriate multiplier based on where the enemy was hit (head, body, or other). Also informs the target where the hit occured
 
 		}
 		else 

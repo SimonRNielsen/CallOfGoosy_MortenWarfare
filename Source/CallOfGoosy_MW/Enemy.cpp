@@ -1,6 +1,6 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-
+#include "Perception/AISense_Damage.h"
 #include "Enemy.h"
 
 // Sets default values
@@ -32,7 +32,7 @@ void AEnemy::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 
 }
 
-void AEnemy::GetHit_Implementation(int damage, FVector impactPoint, FRotator impactNormal)
+void AEnemy::GetHit_Implementation(int damage, FVector impactPoint, FRotator impactNormal, AActor* culprit)
 {
 	//Taking damage which will be reduced by damage
 	health -= damage;
@@ -54,6 +54,15 @@ void AEnemy::GetHit_Implementation(int damage, FVector impactPoint, FRotator imp
 		);
 
 	}
+
+	UAISense_Damage::ReportDamageEvent(
+		GetWorld(),
+		this,
+		culprit,
+		damage,
+		culprit->GetActorLocation(),
+		this->GetActorLocation()
+	);
 
 	//If health is 0 or less call the HandleDeath event in Blueprint
 	if (health <= 0)
