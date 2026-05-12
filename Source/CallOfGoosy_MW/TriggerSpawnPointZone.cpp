@@ -74,6 +74,8 @@ AActor* ATriggerSpawnPointZone::MoveToActivePool(FTransform spawnTransform)
 
 		AliveAcctor->GetRootComponent()->Activate();
 		AliveAcctor->GetRootComponent()->SetVisibility(true);
+		ActiveActors.Add(AliveAcctor);
+		InactiveActors.RemoveAt(length - 1);
 
 		AliveAcctor->SetActorTransform(spawnTransform);
 		return AliveAcctor;
@@ -85,6 +87,7 @@ AActor* ATriggerSpawnPointZone::SpawnEnemy(FTransform spawnTransform)
 	FActorSpawnParameters parameters; //Used for setting additional spawnparameters
 	AEnemy* newEnemy = GetWorld()->SpawnActor<AEnemy>(enemyClass, spawnTransform, parameters); //Sets the pointer while spawning the new enemyn at the same time
 	newEnemy->parent = this; //Setting this as parent for the newEnemy
+	ActiveActors.Add(newEnemy); //Adds the new enemy to the active pool
 
 	return newEnemy;
 }
